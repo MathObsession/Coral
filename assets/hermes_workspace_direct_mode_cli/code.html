@@ -1,0 +1,400 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<meta content="web_dashboard" name="shell-type">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+    @layer base {
+      html, body { margin: 0; padding: 0; }
+      body { overscroll-behavior: none; }
+      main > :first-child { margin-top: 0 !important; }
+      main > :last-child { margin-bottom: 0 !important; }
+    }
+    ::-webkit-scrollbar { display: none; }
+  </style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "text-muted": "#777777",
+            "primary-fixed-dim": "#6be026",
+            "surface-canvas": "#F7F7F7",
+            "primary-shade": "#46A302",
+            "error": "#ba1a1a",
+            "tertiary": "#006590",
+            "accent-yellow": "#FFC800",
+            "accent-red": "#FF4B4B",
+            "border-bold": "#CECECE",
+            "border-subtle": "#E5E5E5",
+            "surface-card": "#FFFFFF",
+            "primary": "#58CC02",
+            "primary-dark": "#46A302",
+            "secondary-container": "#FF9600",
+            "secondary-shade": "#D87000",
+            "surface": "#F7F7F7"
+          },
+          fontFamily: {
+            sans: ["Plus Jakarta Sans", "sans-serif"],
+            mono: ["JetBrains Mono", "monospace"]
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#F7F7F7] font-sans text-[#4B4B4B] antialiased selection:bg-[#58CC02]/20 selection:text-[#46A302]">
+<!-- Duolingo Tactile Sidebar -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-white border-r-2 border-[#E5E5E5] z-50 flex flex-col justify-between select-none">
+<div class="flex flex-col">
+<!-- Workspace Brand -->
+<div class="h-16 px-6 flex items-center justify-between border-b-2 border-[#E5E5E5]">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-xl bg-[#58CC02] border-b-4 border-[#46A302] flex items-center justify-center text-white shadow-sm overflow-hidden"><img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnrbrzL1I5PX7ETTQjT6pLD3cQSPKgHEk7jNOKBc3IQo3Oez5Tzn-n7gQEUe3vtsITEmD9bjW2a7DDHLruVub461k-ISI_KctBzJB4F3rqpiqJwLug27DtXJ2d0xuS4bxdGYsbm-nxqwCulnlhT-88rU_jlerFIU8b0S9jxkSl8HMutEGWkzyuxq-hDpSH4ILYq4nzAZPV__6qDyxoJMrCkEQJdZ32NkcH3AbVrFwOniJGY_mUDWzvYg" alt="Hermes" class="w-full h-full object-cover"></div>
+<span class="font-extrabold text-[#3C3C3C] text-[17px] tracking-tight">Hermes</span>
+</div>
+<div class="flex items-center gap-1.5 bg-[#F7F7F7] px-2 py-1 rounded-full border-2 border-[#E5E5E5]">
+<span class="w-2.5 h-2.5 rounded-full bg-[#FF4B4B] border border-[#D33131]"></span>
+<span class="w-2.5 h-2.5 rounded-full bg-[#FFC800] border border-[#E5A500]"></span>
+<span class="w-2.5 h-2.5 rounded-full bg-[#58CC02] border border-[#46A302]"></span>
+</div>
+</div>
+<!-- Navigation Category -->
+<div class="px-5 pt-6 pb-2">
+<span class="font-bold text-[11px] uppercase tracking-wider text-[#AFAFAF]">Navigation</span>
+</div>
+<!-- Tactile Nav Items -->
+<nav class="flex flex-col gap-2 px-3">
+<!-- Workspace Link -->
+<a class="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-[#777777] font-bold text-[14px] hover:bg-[#F0F0F0] active:translate-y-0.5 transition-all" data-path="workspace" href="#">
+<span class="material-symbols-outlined text-[22px]">space_dashboard</span>
+<span>Workspace</span>
+</a>
+<!-- Schedules Link -->
+<a class="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-[#777777] font-bold text-[14px] hover:bg-[#F0F0F0] active:translate-y-0.5 transition-all" data-path="schedules" href="#">
+<span class="material-symbols-outlined text-[22px]">calendar_month</span>
+<span>Schedules</span>
+</a>
+<!-- Direct Mode (Active Duo Chunky State) -->
+<a aria-current="page" class="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl bg-[#E5F6D3] text-[#46A302] border-2 border-[#58CC02] border-b-4 font-extrabold text-[14px] transition-all shadow-sm" data-path="direct-mode" href="#">
+<span class="material-symbols-outlined text-[22px]">terminal</span>
+<span>Direct Mode (CLI)</span>
+</a>
+</nav>
+</div>
+<!-- Sidebar Footer -->
+<div class="p-3 flex flex-col gap-3 border-t-2 border-[#E5E5E5] bg-[#FBFBFB]">
+<!-- Status pill -->
+
+<!-- User Profile Card -->
+<div class="flex items-center justify-between px-2 py-1">
+<div class="flex items-center gap-2.5">
+<div class="w-9 h-9 rounded-2xl bg-[#1CB0F6] border-b-4 border-[#1899D6] flex items-center justify-center text-white font-extrabold shadow-sm overflow-hidden"><img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnrbrzL1I5PX7ETTQjT6pLD3cQSPKgHEk7jNOKBc3IQo3Oez5Tzn-n7gQEUe3vtsITEmD9bjW2a7DDHLruVub461k-ISI_KctBzJB4F3rqpiqJwLug27DtXJ2d0xuS4bxdGYsbm-nxqwCulnlhT-88rU_jlerFIU8b0S9jxkSl8HMutEGWkzyuxq-hDpSH4ILYq4nzAZPV__6qDyxoJMrCkEQJdZ32NkcH3AbVrFwOniJGY_mUDWzvYg" alt="Hermes Dev" class="w-full h-full object-cover"></div>
+<div class="flex flex-col">
+<span class="font-bold text-sm text-[#3C3C3C] leading-tight">Hermes Dev</span>
+<span class="font-bold text-[11px] text-[#AFAFAF]">hermes@local</span>
+</div>
+</div>
+<button class="text-[#AFAFAF] hover:text-[#4B4B4B] p-1.5 rounded-xl hover:bg-[#E5E5E5]/60 transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+</button>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<div class="pl-64">
+<!-- Top Nav Header -->
+<header class="fixed top-0 left-64 right-0 h-16 bg-white/95 backdrop-blur-md border-b-2 border-[#E5E5E5] z-40 flex items-center justify-between px-8">
+<div class="flex items-center gap-2">
+<span class="font-extrabold text-xs tracking-wider text-[#AFAFAF] uppercase">Environment</span>
+<span class="text-[#CECECE] font-bold">/</span>
+<span class="px-2.5 py-1 rounded-xl bg-[#F0F0F0] text-[#4B4B4B] font-extrabold text-xs border border-[#E5E5E5]">Local Engine</span>
+</div>
+<div class="flex items-center gap-3">
+<!-- Search bar with tactile border -->
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-[#AFAFAF] text-[18px]">search</span>
+<input class="h-9 pl-9 pr-4 bg-[#F7F7F7] border-2 border-[#E5E5E5] rounded-2xl font-bold text-xs text-[#4B4B4B] placeholder:text-[#AFAFAF] focus:outline-none focus:border-[#58CC02] focus:bg-white w-64 transition-all" placeholder="Jump to or search (Cmd+K)" type="text">
+</div>
+<button class="h-9 w-9 flex items-center justify-center rounded-2xl border-2 border-b-4 border-[#E5E5E5] bg-white text-[#777777] hover:bg-[#F7F7F7] active:border-b-2 active:translate-y-0.5 transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">notifications</span>
+</button>
+<div class="w-9 h-9 rounded-2xl bg-[#58CC02] border-b-4 border-[#46A302] flex items-center justify-center text-white font-extrabold shadow-sm cursor-pointer active:translate-y-0.5 transition-all">
+<span class="material-symbols-outlined text-[20px]">person</span>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="relative pt-16 min-h-screen bg-[#F7F7F7]">
+<div class="p-6 md:p-8 flex flex-col gap-6 max-w-7xl mx-auto w-full">
+<!-- Header Chunky Bar -->
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white border-2 border-b-4 border-[#E5E5E5] p-6 rounded-3xl shadow-sm">
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-3 flex-wrap">
+<h1 class="font-extrabold text-2xl text-[#3C3C3C] tracking-tight">Direct Mode</h1>
+
+
+</div>
+
+</div>
+<!-- Duolingo-style Tactile 3D Action Buttons -->
+<div class="flex items-center gap-2.5 self-start lg:self-auto flex-wrap">
+<!-- Clear Terminal -->
+<button class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-white border-2 border-b-4 border-[#E5E5E5] hover:bg-[#F7F7F7] active:border-b-2 active:translate-y-0.5 text-[#4B4B4B] font-extrabold text-sm transition-all" id="clear-term-btn" type="button">
+<span class="material-symbols-outlined text-[18px] text-[#777777]">cleaning_services</span>
+<span>Clear Terminal</span>
+</button>
+<!-- Restart Session -->
+<button class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-white border-2 border-b-4 border-[#E5E5E5] hover:bg-[#F7F7F7] active:border-b-2 active:translate-y-0.5 text-[#4B4B4B] font-extrabold text-sm transition-all" id="restart-btn" type="button">
+<span class="material-symbols-outlined text-[18px] text-[#777777]">restart_alt</span>
+<span>Restart Session</span>
+</button>
+<!-- Fullscreen toggle -->
+<button class="inline-flex items-center justify-center p-2.5 rounded-2xl bg-white border-2 border-b-4 border-[#E5E5E5] hover:bg-[#F7F7F7] active:border-b-2 active:translate-y-0.5 text-[#777777] hover:text-[#4B4B4B] transition-all" id="fullscreen-btn" title="Toggle Fullscreen" type="button">
+<span class="material-symbols-outlined text-[20px]">fullscreen</span>
+</button>
+<!-- Snapshot CTA (Chunky Orange / Secondary 3D Button) -->
+
+</div>
+</div>
+<!-- Terminal Window Card: High-contrast Dark Body with Solid 2px Border & Rounded-3xl Corners -->
+<div class="flex flex-col rounded-3xl overflow-hidden border-2 border-[#1E1E24] shadow-md bg-[#1E1E24] text-[#E0E0E0]" id="terminal-wrapper">
+<!-- Terminal Window Header Chrome -->
+<div class="flex items-center justify-between px-5 py-3.5 bg-[#18181C] border-b-2 border-[#2C2C34] select-none">
+<div class="flex items-center gap-2.5">
+<!-- Playful macOS window dots -->
+<span class="w-3.5 h-3.5 rounded-full bg-[#FF5F56] border border-[#E0443E] inline-block shadow-sm"></span>
+<span class="w-3.5 h-3.5 rounded-full bg-[#FFBD2E] border border-[#DEA123] inline-block shadow-sm"></span>
+<span class="w-3.5 h-3.5 rounded-full bg-[#27C93F] border border-[#1AAB29] inline-block shadow-sm"></span>
+<span class="ml-3 font-mono text-xs font-bold text-[#AFAFAF] tracking-wide">hermes@node-us-west-pty0</span>
+</div>
+<div class="flex items-center gap-4 text-[#8C8C9A]">
+<span class="flex items-center gap-1.5 font-mono text-xs font-semibold px-2 py-0.5 rounded-lg bg-[#272730] text-[#58CC02]">
+<span class="material-symbols-outlined text-[14px]">speed</span>
+                18ms
+              </span>
+<span class="font-mono text-xs font-semibold">UTF-8</span>
+<span class="material-symbols-outlined text-[18px] hover:text-white cursor-pointer transition-colors" title="Settings">tune</span>
+</div>
+</div>
+<!-- Terminal Body / Interactive Shell -->
+<div class="p-6 font-mono text-[13px] flex flex-col gap-2 min-h-[460px] max-h-[620px] overflow-y-auto leading-relaxed select-text bg-[#1E1E24]" id="terminal-content">
+<div class="text-[#58CC02] font-bold tracking-tight">hermes-agent v2.4 (direct-mode)</div>
+<div class="text-[#8C8C9A]">Connected to hermes-cloud-v2 in us-west...</div>
+<div class="text-[#8C8C9A]">[Hermes CLI] Ready for input. Type <span class="text-[#FFC800] underline font-bold cursor-pointer" onclick="sendCmd('/help')">/help</span> for available commands.</div>
+<div class="mt-2 flex items-center gap-2">
+<span class="text-[#58CC02] font-bold">hermes&gt;</span>
+<span class="text-white font-medium">run --daemon "worker-sync"</span>
+</div>
+<div class="flex flex-col gap-1 pl-2 text-[#AFAFAF] text-xs">
+<div class="flex items-center gap-2">
+<span class="text-[#686874]">[10:41:02]</span>
+<span class="text-[#1CB0F6] font-bold">[INFO]</span>
+<span>Spawning background worker on port 8080...</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[#686874]">[10:41:03]</span>
+<span class="text-[#1CB0F6] font-bold">[INFO]</span>
+<span>Worker healthcheck OK (latency: 18ms)</span>
+</div>
+</div>
+<!-- Dynamic Output Stream Container -->
+<div class="flex flex-col gap-1.5" id="dynamic-log"></div>
+<!-- Active Interactive Line -->
+<div class="flex items-center gap-2 mt-2">
+<span class="text-[#58CC02] font-bold select-none">hermes&gt;</span>
+<div class="relative flex-1 flex items-center">
+<input autocomplete="off" autofocus="" class="w-full bg-transparent border-none outline-none text-white font-mono p-0 focus:ring-0 leading-tight" id="term-input" spellcheck="false" type="text" value="">
+<span class="inline-block w-2.5 h-4 bg-[#58CC02] ml-0.5 animate-pulse pointer-events-none" id="term-caret"></span>
+</div>
+</div>
+</div>
+<!-- Quick Command Tray within Terminal -->
+<div class="px-6 py-3 bg-[#18181C] border-t-2 border-[#2C2C34] flex items-center justify-between text-[#8C8C9A] font-sans text-xs font-bold">
+<div class="flex items-center gap-4 flex-wrap">
+<span class="hover:text-white cursor-pointer transition-colors" onclick="sendCmd('/status')">
+<span class="text-[#FFC800] font-mono font-bold">/status</span> Engine status
+              </span>
+<span class="hover:text-white cursor-pointer transition-colors" onclick="sendCmd('worker-sync --metrics')">
+<span class="text-[#FFC800] font-mono font-bold">/metrics</span> Worker IO
+              </span>
+<span class="hover:text-white cursor-pointer transition-colors" onclick="sendCmd('/logs --tail')">
+<span class="text-[#FFC800] font-mono font-bold">/logs</span> Stream
+              </span>
+</div>
+<div class="hidden sm:flex items-center gap-2 text-[#737380] font-mono text-[11px]">
+<span class="w-2 h-2 rounded-full bg-[#58CC02]"></span>
+<span>Buffer: 1024 lines</span>
+</div>
+</div>
+</div>
+<!-- Terminal Shortcuts Ribbon -->
+
+<!-- Chunky Duolingo Stats Cards: 2px border, 4px bottom bevel, clear labels & punchy numbers -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+<!-- Card 1: Active Agent Node -->
+
+<!-- Card 2: Event Loop Latency -->
+
+<!-- Card 3: Daemon Process -->
+
+</div>
+</div>
+<!-- Functional Script preserving terminal commands & actions -->
+<script>
+        (function() {
+          const input = document.getElementById('term-input');
+          const caret = document.getElementById('term-caret');
+          const logContainer = document.getElementById('dynamic-log');
+          const termContainer = document.getElementById('terminal-content');
+          const clearBtn = document.getElementById('clear-term-btn');
+          const restartBtn = document.getElementById('restart-btn');
+          const fullscreenBtn = document.getElementById('fullscreen-btn');
+          const wrapper = document.getElementById('terminal-wrapper');
+
+          // Keep active focus on terminal on container click
+          termContainer.addEventListener('click', () => {
+            input.focus();
+          });
+
+          // Hide pseudo caret when typing
+          input.addEventListener('input', () => {
+            if (input.value.length > 0) {
+              caret.classList.add('hidden');
+            } else {
+              caret.classList.remove('hidden');
+            }
+          });
+
+          window.sendCmd = function(command) {
+            executeCommand(command);
+          };
+
+          function addLog(cmd, responseLines) {
+            const now = new Date();
+            const timeStr = now.toTimeString().split(' ')[0];
+
+            const cmdBlock = document.createElement('div');
+            cmdBlock.className = 'mt-2 flex items-center gap-2';
+            cmdBlock.innerHTML = `<span class="text-[#58CC02] font-bold">hermes&gt;</span><span class="text-white font-medium">${escapeHtml(cmd)}</span>`;
+            logContainer.appendChild(cmdBlock);
+
+            if (responseLines && responseLines.length > 0) {
+              const respContainer = document.createElement('div');
+              respContainer.className = 'flex flex-col gap-1 pl-2 text-[#AFAFAF] text-xs';
+              
+              responseLines.forEach(line => {
+                const row = document.createElement('div');
+                row.className = 'flex items-center gap-2';
+                row.innerHTML = `<span class="text-[#686874]">[${timeStr}]</span>${line}`;
+                respContainer.appendChild(row);
+              });
+
+              logContainer.appendChild(respContainer);
+            }
+
+            termContainer.scrollTop = termContainer.scrollHeight;
+          }
+
+          function executeCommand(val) {
+            const cmd = val.trim();
+            if (!cmd) return;
+
+            if (cmd === '/clear' || cmd === 'clear') {
+              logContainer.innerHTML = '';
+              input.value = '';
+              caret.classList.remove('hidden');
+              return;
+            }
+
+            if (cmd === '/help') {
+              addLog(cmd, [
+                '<span class="text-[#FFC800] font-bold">[CLI]</span> Available commands:',
+                '<span>  /help              List all commands</span>',
+                '<span>  /status            Print system and node status</span>',
+                '<span>  /logs              Display daemon stdout/stderr</span>',
+                '<span>  run &lt;task&gt;          Execute task synchronously or as --daemon</span>',
+                '<span>  stop &lt;pid&gt;          Terminate running background worker</span>',
+                '<span>  clear              Wipe current terminal scrollback buffer</span>'
+              ]);
+            } else if (cmd === '/status') {
+              addLog(cmd, [
+                '<span class="text-[#1CB0F6] font-bold">[INFO]</span> Agent Cluster: US-West-2 (3 active nodes)',
+                '<span class="text-[#1CB0F6] font-bold">[INFO]</span> Engine version: v2.4-prod-stable (arm64)',
+                '<span class="text-[#1CB0F6] font-bold">[INFO]</span> Webhook receiver: Healthy'
+              ]);
+            } else if (cmd.startsWith('run')) {
+              addLog(cmd, [
+                '<span class="text-[#1CB0F6] font-bold">[INFO]</span> Task dispatched to executor queue.',
+                '<span class="text-[#1CB0F6] font-bold">[INFO]</span> Subprocess initiated with exit handler.'
+              ]);
+            } else {
+              addLog(cmd, [
+                `<span class="text-[#FF4B4B] font-bold">[WARN]</span> Command not recognized: "${escapeHtml(cmd)}". Try /help.`
+              ]);
+            }
+
+            input.value = '';
+            caret.classList.remove('hidden');
+            termContainer.scrollTop = termContainer.scrollHeight;
+          }
+
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              executeCommand(input.value);
+            } else if (e.ctrlKey && e.key === 'l') {
+              e.preventDefault();
+              logContainer.innerHTML = '';
+            } else if (e.ctrlKey && e.key === 'c') {
+              e.preventDefault();
+              addLog('^C', ['<span class="text-[#FF4B4B] font-bold">[INT]</span> Interrupt signal caught']);
+              input.value = '';
+            }
+          });
+
+          clearBtn.addEventListener('click', () => {
+            logContainer.innerHTML = '';
+            input.value = '';
+            input.focus();
+          });
+
+          restartBtn.addEventListener('click', () => {
+            logContainer.innerHTML = '';
+            addLog('restart --force', [
+              '<span class="text-[#1CB0F6] font-bold">[SYS]</span> Reconnecting pty socket...',
+              '<span class="text-[#1CB0F6] font-bold">[SYS]</span> Handshake established. Session resumed.'
+            ]);
+            input.focus();
+          });
+
+          fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+              wrapper.requestFullscreen().catch(err => {
+                console.warn(`Fullscreen error: ${err.message}`);
+              });
+            } else {
+              document.exitFullscreen();
+            }
+          });
+
+          function escapeHtml(str) {
+            return str.replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/"/g, '&quot;')
+                      .replace(/'/g, '&#039;');
+          }
+        })();
+      </script>
+</main>
+</div>
+
+
+
+
+
+
+</body></html>

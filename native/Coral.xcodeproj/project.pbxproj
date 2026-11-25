@@ -1,0 +1,482 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		009AE8CADE126749BEB3AF94 /* Coral/CoralApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 078F7E2E0E3134CD40E41C79 /* Coral/CoralApp.swift */; };
+		08532F8BFFAB3FD6A60B408B /* Coral/Schedules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F7A4A36AD550797A7A2E9A /* Coral/Schedules.swift */; };
+		0DF5BF0C72B271C17FFCBF6C /* Coral/Dashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44DFECED677C973ABAD0EAA /* Coral/Dashboard.swift */; };
+		1693070A4226DF37822216AC /* Coral/Workspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F5858A684CFDE49663723A5 /* Coral/Workspace.swift */; };
+		1B5A6A1301A0318EE394CF62 /* Coral/Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED7CC0379365D648E2E55E50 /* Coral/Models.swift */; };
+		2114D2C7E15DE9880C401555 /* Coral/Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2A3628471FDA5FA98A61086 /* Coral/Assets.xcassets */; };
+		301A8735A1CEC50026321A6F /* Coral/Terminal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FC49561956EEFB01832DEA6 /* Coral/Terminal.swift */; };
+		32FA8A6526792A6198FA2502 /* Coral/Files.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66C15333882958C64FF3EDDB /* Coral/Files.swift */; };
+		353F5314CD42417D73E1C515 /* Coral/Dashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44DFECED677C973ABAD0EAA /* Coral/Dashboard.swift */; };
+		4B4EC1F8807E7AF54C67BA10 /* Coral/CoralApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 078F7E2E0E3134CD40E41C79 /* Coral/CoralApp.swift */; };
+		511AC86780F6039DEDAFA0E1 /* Coral/API.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85F193BFB16CF2F13D15B14E /* Coral/API.swift */; };
+		53EE3316F9D1E53049F1AE85 /* Coral/Schedules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F7A4A36AD550797A7A2E9A /* Coral/Schedules.swift */; };
+		71FACAC5A78F3B24D499AD0B /* Coral/Workspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F5858A684CFDE49663723A5 /* Coral/Workspace.swift */; };
+		7FFFB5B6DF06D3AC42E40F27 /* Coral/Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E0AA9A9DF37C535BE5EC44B /* Coral/Store.swift */; };
+		88E24FBAC73906CB6BC3EC19 /* Coral/Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2A3628471FDA5FA98A61086 /* Coral/Assets.xcassets */; };
+		AB5B9E65678BA4F224762667 /* Coral/Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E0AA9A9DF37C535BE5EC44B /* Coral/Store.swift */; };
+		B9A9A76C095CB81FDE71EE30 /* Coral/Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED7CC0379365D648E2E55E50 /* Coral/Models.swift */; };
+		CDF9907DC09DB7832CB47D7B /* Coral/Files.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66C15333882958C64FF3EDDB /* Coral/Files.swift */; };
+		D1494228718F6F8EC6A575BB /* Coral/Terminal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FC49561956EEFB01832DEA6 /* Coral/Terminal.swift */; };
+		D48629A4D1862DFB6E630296 /* Coral/Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0AC4B498A3B054AD0A217B /* Coral/Theme.swift */; };
+		E6E0CE1E73BAE42097587088 /* CoralTests/CoralTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C62E4EFE38BF97DBDFEDB7E5 /* CoralTests/CoralTests.swift */; };
+		E8F5050E9BD93C2FE47F8F17 /* Coral/Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = C151C7A792B4AD7C9EB4E74A /* Coral/Settings.swift */; };
+		E9D4C99C37E63702416231AB /* Coral/API.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85F193BFB16CF2F13D15B14E /* Coral/API.swift */; };
+		F080E7C23550B416E0728BB2 /* Coral/Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = C151C7A792B4AD7C9EB4E74A /* Coral/Settings.swift */; };
+		F5DAFDA6A642E42E54320812 /* Coral/Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E0AC4B498A3B054AD0A217B /* Coral/Theme.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		E9CA66683FF22D7B8CC65928 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 98F54143AB4E86B28C3AFEE0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A12A4CCC45B3A27177D66E5B;
+			remoteInfo = "Coral-macOS";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		02E2A633D8A0589B04ED7B9F /* Coral/Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Coral/Info.plist; sourceTree = "<group>"; };
+		05F7A4A36AD550797A7A2E9A /* Coral/Schedules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coral/Schedules.swift; sourceTree = "<group>"; };
+		078F7E2E0E3134CD40E41C79 /* Coral/CoralApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coral/CoralApp.swift; sourceTree = "<group>"; };
+		1394DCD000CC6FC38AAEF022 /* Coral-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; path = "Coral-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1FC49561956EEFB01832DEA6 /* Coral/Terminal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coral/Terminal.swift; sourceTree = "<group>"; };
+		2F5858A684CFDE49663723A5 /* Coral/Workspace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coral/Workspace.swift; sourceTree = "<group>"; };
+		4F48806D37CC99BACF4AEB1B /* Coral-Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = "Coral-Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		66C15333882958C64FF3EDDB /* Coral/Files.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coral/Files.swift; sourceTree = "<group>"; };
+		72B1E145FF31C363E2C55051 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+		85F193BFB16CF2F13D15B14E /* Coral/API.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coral/API.swift; sourceTree = "<group>"; };
+		8E0AA9A9DF37C535BE5EC44B /* Coral/Store.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coral/Store.swift; sourceTree = "<group>"; };
+		95F82B769332D8F0F7B0006B /* Coral-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; path = "Coral-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9E0AC4B498A3B054AD0A217B /* Coral/Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coral/Theme.swift; sourceTree = "<group>"; };
+		A2A3628471FDA5FA98A61086 /* Coral/Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Coral/Assets.xcassets; sourceTree = "<group>"; };
+		C151C7A792B4AD7C9EB4E74A /* Coral/Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coral/Settings.swift; sourceTree = "<group>"; };
+		C62E4EFE38BF97DBDFEDB7E5 /* CoralTests/CoralTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoralTests/CoralTests.swift; sourceTree = "<group>"; };
+		D44DFECED677C973ABAD0EAA /* Coral/Dashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coral/Dashboard.swift; sourceTree = "<group>"; };
+		ED7CC0379365D648E2E55E50 /* Coral/Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coral/Models.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3710EBC0ED2A9F155E33B686 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D286C2B0FD5794D4F3E233D8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DF98488CF91A9CFF845254B7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		B28B7AF69320201D1CF206EB = {
+			isa = PBXGroup;
+			children = (
+				85F193BFB16CF2F13D15B14E /* Coral/API.swift */,
+				078F7E2E0E3134CD40E41C79 /* Coral/CoralApp.swift */,
+				D44DFECED677C973ABAD0EAA /* Coral/Dashboard.swift */,
+				66C15333882958C64FF3EDDB /* Coral/Files.swift */,
+				ED7CC0379365D648E2E55E50 /* Coral/Models.swift */,
+				05F7A4A36AD550797A7A2E9A /* Coral/Schedules.swift */,
+				C151C7A792B4AD7C9EB4E74A /* Coral/Settings.swift */,
+				8E0AA9A9DF37C535BE5EC44B /* Coral/Store.swift */,
+				1FC49561956EEFB01832DEA6 /* Coral/Terminal.swift */,
+				9E0AC4B498A3B054AD0A217B /* Coral/Theme.swift */,
+				2F5858A684CFDE49663723A5 /* Coral/Workspace.swift */,
+				A2A3628471FDA5FA98A61086 /* Coral/Assets.xcassets */,
+				C62E4EFE38BF97DBDFEDB7E5 /* CoralTests/CoralTests.swift */,
+				72B1E145FF31C363E2C55051 /* Config.xcconfig */,
+				02E2A633D8A0589B04ED7B9F /* Coral/Info.plist */,
+				FBDC4F23F93125BBEEAE800C /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		FBDC4F23F93125BBEEAE800C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1394DCD000CC6FC38AAEF022 /* Coral-macOS.app */,
+				95F82B769332D8F0F7B0006B /* Coral-iOS.app */,
+				4F48806D37CC99BACF4AEB1B /* Coral-Tests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		4D32EE84969F8DA7F97664D6 /* Coral-iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1F10B33F9F5B0D42C7188951 /* Build configuration list for PBXNativeTarget "Coral-iOS" */;
+			buildPhases = (
+				27573587FEB7F9924B419F11 /* Sources */,
+				3710EBC0ED2A9F155E33B686 /* Frameworks */,
+				1FC9DC9A9184E531CDE7516D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Coral-iOS";
+			productName = "Coral-iOS";
+			productReference = 95F82B769332D8F0F7B0006B /* Coral-iOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+		A12A4CCC45B3A27177D66E5B /* Coral-macOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DA71190CDD54A48993E952E9 /* Build configuration list for PBXNativeTarget "Coral-macOS" */;
+			buildPhases = (
+				D9A71ED17A93A679F9435764 /* Sources */,
+				DF98488CF91A9CFF845254B7 /* Frameworks */,
+				A1C977CB5678446E4AA370C1 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Coral-macOS";
+			productName = "Coral-macOS";
+			productReference = 1394DCD000CC6FC38AAEF022 /* Coral-macOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+		C1EB0BA6386739FC6E547D33 /* Coral-Tests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2AA2095620FA99D6A07A54DA /* Build configuration list for PBXNativeTarget "Coral-Tests" */;
+			buildPhases = (
+				CDC94B806074F0013CC6F8B5 /* Sources */,
+				D286C2B0FD5794D4F3E233D8 /* Frameworks */,
+				5F60779CFB8CC258FA204B37 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C58B1D22E6B06406536A4294 /* PBXTargetDependency */,
+			);
+			name = "Coral-Tests";
+			productName = "Coral-Tests";
+			productReference = 4F48806D37CC99BACF4AEB1B /* Coral-Tests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		98F54143AB4E86B28C3AFEE0 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 2700;
+			};
+			buildConfigurationList = 49EA05A46B1A86EA7E413B43 /* Build configuration list for PBXProject "Coral" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = B28B7AF69320201D1CF206EB;
+			productRefGroup = FBDC4F23F93125BBEEAE800C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A12A4CCC45B3A27177D66E5B /* Coral-macOS */,
+				4D32EE84969F8DA7F97664D6 /* Coral-iOS */,
+				C1EB0BA6386739FC6E547D33 /* Coral-Tests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1FC9DC9A9184E531CDE7516D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				88E24FBAC73906CB6BC3EC19 /* Coral/Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5F60779CFB8CC258FA204B37 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1C977CB5678446E4AA370C1 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2114D2C7E15DE9880C401555 /* Coral/Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		27573587FEB7F9924B419F11 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E9D4C99C37E63702416231AB /* Coral/API.swift in Sources */,
+				009AE8CADE126749BEB3AF94 /* Coral/CoralApp.swift in Sources */,
+				0DF5BF0C72B271C17FFCBF6C /* Coral/Dashboard.swift in Sources */,
+				32FA8A6526792A6198FA2502 /* Coral/Files.swift in Sources */,
+				B9A9A76C095CB81FDE71EE30 /* Coral/Models.swift in Sources */,
+				08532F8BFFAB3FD6A60B408B /* Coral/Schedules.swift in Sources */,
+				F080E7C23550B416E0728BB2 /* Coral/Settings.swift in Sources */,
+				AB5B9E65678BA4F224762667 /* Coral/Store.swift in Sources */,
+				301A8735A1CEC50026321A6F /* Coral/Terminal.swift in Sources */,
+				D48629A4D1862DFB6E630296 /* Coral/Theme.swift in Sources */,
+				1693070A4226DF37822216AC /* Coral/Workspace.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CDC94B806074F0013CC6F8B5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E6E0CE1E73BAE42097587088 /* CoralTests/CoralTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D9A71ED17A93A679F9435764 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				511AC86780F6039DEDAFA0E1 /* Coral/API.swift in Sources */,
+				4B4EC1F8807E7AF54C67BA10 /* Coral/CoralApp.swift in Sources */,
+				353F5314CD42417D73E1C515 /* Coral/Dashboard.swift in Sources */,
+				CDF9907DC09DB7832CB47D7B /* Coral/Files.swift in Sources */,
+				1B5A6A1301A0318EE394CF62 /* Coral/Models.swift in Sources */,
+				53EE3316F9D1E53049F1AE85 /* Coral/Schedules.swift in Sources */,
+				E8F5050E9BD93C2FE47F8F17 /* Coral/Settings.swift in Sources */,
+				7FFFB5B6DF06D3AC42E40F27 /* Coral/Store.swift in Sources */,
+				D1494228718F6F8EC6A575BB /* Coral/Terminal.swift in Sources */,
+				F5DAFDA6A642E42E54320812 /* Coral/Theme.swift in Sources */,
+				71FACAC5A78F3B24D499AD0B /* Coral/Workspace.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C58B1D22E6B06406536A4294 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A12A4CCC45B3A27177D66E5B /* Coral-macOS */;
+			targetProxy = E9CA66683FF22D7B8CC65928 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		0DE5E4236ADB5F01436AAF0E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 72B1E145FF31C363E2C55051 /* Config.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Coral/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.coral.workspace.ios;
+				PRODUCT_MODULE_NAME = Coral;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		1E5726F639147448F52F2644 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 72B1E145FF31C363E2C55051 /* Config.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Coral/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.coral.workspace.mac;
+				PRODUCT_MODULE_NAME = Coral;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		481BA346357EC3CDD8D664D5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 72B1E145FF31C363E2C55051 /* Config.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.coral.workspace.tests;
+				PRODUCT_MODULE_NAME = CoralTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Coral-macOS.app/Contents/MacOS/Coral-macOS";
+			};
+			name = Debug;
+		};
+		89E1FD6268CC0F221A2BE178 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+			};
+			name = Debug;
+		};
+		AD5C7B84E36A2A2C5B424955 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 72B1E145FF31C363E2C55051 /* Config.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.coral.workspace.tests;
+				PRODUCT_MODULE_NAME = CoralTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Coral-macOS.app/Contents/MacOS/Coral-macOS";
+			};
+			name = Release;
+		};
+		CEFF2A840B7E44DB8C6F2A0C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 72B1E145FF31C363E2C55051 /* Config.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Coral/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.coral.workspace.mac;
+				PRODUCT_MODULE_NAME = Coral;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		E6DE6C99132752C914FEF632 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+			};
+			name = Release;
+		};
+		F82F02CF68322DD610910D6D /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 72B1E145FF31C363E2C55051 /* Config.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Coral/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.coral.workspace.ios;
+				PRODUCT_MODULE_NAME = Coral;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1F10B33F9F5B0D42C7188951 /* Build configuration list for PBXNativeTarget "Coral-iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0DE5E4236ADB5F01436AAF0E /* Debug */,
+				F82F02CF68322DD610910D6D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2AA2095620FA99D6A07A54DA /* Build configuration list for PBXNativeTarget "Coral-Tests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				481BA346357EC3CDD8D664D5 /* Debug */,
+				AD5C7B84E36A2A2C5B424955 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		49EA05A46B1A86EA7E413B43 /* Build configuration list for PBXProject "Coral" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				89E1FD6268CC0F221A2BE178 /* Debug */,
+				E6DE6C99132752C914FEF632 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DA71190CDD54A48993E952E9 /* Build configuration list for PBXNativeTarget "Coral-macOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CEFF2A840B7E44DB8C6F2A0C /* Debug */,
+				1E5726F639147448F52F2644 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 98F54143AB4E86B28C3AFEE0 /* Project object */;
+}

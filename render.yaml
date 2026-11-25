@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: coral-api
+    runtime: docker
+    plan: starter
+    dockerfilePath: backend/Dockerfile
+    healthCheckPath: /health
+    numInstances: 1
+    disk:
+      name: coral-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+      - key: CORAL_ENCRYPTION_KEY
+        sync: false
+      - key: CORAL_PUBLIC_URL
+        sync: false
+      - key: CORAL_WEB_URL
+        sync: false
+      - key: CORAL_DATABASE
+        value: /data/coral.sqlite
+      - key: CORAL_DEMO
+        value: "0"

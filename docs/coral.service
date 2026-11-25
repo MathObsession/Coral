@@ -1,0 +1,17 @@
+[Unit]
+Description=Coral authentication and scheduler
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=coral
+WorkingDirectory=/opt/coral
+EnvironmentFile=/etc/coral.env
+Environment=PYTHONPATH=/opt/coral/backend
+ExecStart=/opt/coral/.venv/bin/python -m uvicorn coral.app:production_app --factory --host 127.0.0.1 --port 8000 --workers 1 --no-access-log
+Restart=always
+RestartSec=5
+TimeoutStopSec=90
+
+[Install]
+WantedBy=multi-user.target

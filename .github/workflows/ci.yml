@@ -1,0 +1,25 @@
+name: Coral checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r backend/requirements-dev.txt
+      - run: python -m pytest backend/tests -q
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test website/tests/*.test.cjs
+      - run: bash -n codespace/install.sh scripts/*.sh
+  native:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: xcodebuild -project native/Coral.xcodeproj -scheme Coral-macOS -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO build-for-testing
+      - run: xcodebuild -project native/Coral.xcodeproj -scheme Coral-iOS -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build

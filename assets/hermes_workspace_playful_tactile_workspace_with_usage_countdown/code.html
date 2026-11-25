@@ -1,0 +1,323 @@
+<!DOCTYPE html><html lang="en" style="width: 1270px; height: 1097px; overflow: hidden; position: relative;"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<meta content="web_dashboard" name="shell-type">
+<title>Hermes Workspace</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style>
+    @layer base {
+      html, body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+      body {
+        overscroll-behavior: none;
+      }
+    }
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+</head>
+<body class="bg-[#F7F7F7] text-[#4B4B4B] antialiased selection:bg-[#58CC02]/20 selection:text-[#58CC02]">
+<!-- Sidebar -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-white z-50 flex flex-col justify-between border-r-2 border-[#E5E5E5] select-none">
+<div class="flex flex-col">
+<!-- Logo / Header with Hermes Mascot mark -->
+<div class="h-16 px-5 flex items-center justify-between border-b-2 border-[#E5E5E5]">
+<div class="flex items-center gap-3">
+<!-- Hermes Fox Mascot Avatar -->
+<img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWq1l8fyqYPSOtILmHtsdpxDVyyhcw95TMF9b9nllVaO3ICqnapAk0IFGIsmq40qOQ3dvl-YQwnzv1e8B-O_UovhGc0xNRaSBDsyJv5ZWBKPoDzOIpBWs5YVtZg6Mt9ftXKwU5hsruPaqTIvgXM2RgbhLtnCk9ORVgUiA_VW9ly4k0WjRaIxbUarg8AVBiT9qKL6_la8pthNYxAEUiXw1CAckDobQ6T8KGdnMnROIFv9hmBigHeyBQ6Q" alt="Hermes Mascot" class="w-10 h-10 object-contain rounded-full border border-black/10 bg-[#FFF7E8]">
+<div>
+<span class="font-extrabold text-[17px] text-[#4B4B4B] tracking-tight block leading-tight">Hermes</span>
+<span class="text-[11px] font-black uppercase tracking-wider text-[#FF9600] block">Dev Studio</span>
+</div>
+</div>
+<!-- Online Dot -->
+
+</div>
+<!-- Navigation label -->
+<div class="px-5 pt-6 pb-2">
+<span class="font-black text-[11px] uppercase tracking-wider text-[#AFAFAF]">Workspace Menu</span>
+</div>
+<!-- Nav Items: Tactile Duolingo chunky style -->
+<nav class="flex flex-col gap-2.5 px-3">
+<!-- 1. Active: Workspace -->
+<a aria-current="page" class="flex items-center gap-3.5 px-4 py-3 rounded-2xl bg-[#EAF8FF] border-2 border-[#1CB0F6] border-b-4 text-[#1CB0F6] font-black text-sm transition-all transform active:translate-y-[2px] active:border-b-2" href="#">
+<div class="w-8 h-8 rounded-xl bg-[#1CB0F6] flex items-center justify-center text-white shadow-sm shrink-0">
+<span class="material-symbols-outlined text-[22px]">space_dashboard</span>
+</div>
+<span class="tracking-wide">Workspace</span>
+</a>
+<!-- 2. Schedules -->
+<a class="flex items-center gap-3.5 px-4 py-3 rounded-2xl bg-white hover:bg-[#F7F7F7] border-2 border-transparent hover:border-[#E5E5E5] text-[#777777] hover:text-[#4B4B4B] font-bold text-sm transition-all active:translate-y-[1px]" href="#">
+<div class="w-8 h-8 rounded-xl bg-[#F0F0F0] flex items-center justify-center text-[#777777] shrink-0">
+<span class="material-symbols-outlined text-[22px]">calendar_today</span>
+</div>
+<span>Schedules</span>
+</a>
+<!-- 3. Direct Mode (Agent CLI) -->
+<a class="flex items-center gap-3.5 px-4 py-3 rounded-2xl bg-white hover:bg-[#F7F7F7] border-2 border-transparent hover:border-[#E5E5E5] text-[#777777] hover:text-[#4B4B4B] font-bold text-sm transition-all active:translate-y-[1px]" href="#">
+<div class="w-8 h-8 rounded-xl bg-[#F0F0F0] flex items-center justify-center text-[#777777] shrink-0">
+<span class="material-symbols-outlined text-[22px]">terminal</span>
+</div>
+<span>Direct Mode (CLI)</span>
+</a>
+</nav>
+<!-- Friendly Fox Daily Streak Banner -->
+<div class="mx-3 mt-6 p-3.5 bg-[#FFF7EB] border-2 border-[#FFD9A0] border-b-4 rounded-2xl">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-xl bg-[#FF9600] flex items-center justify-center text-white shrink-0 shadow-sm font-black text-sm"><span class="material-symbols-outlined text-white text-[20px]">local_fire_department</span></div>
+<div class="flex-1 min-w-0">
+<span class="font-extrabold text-xs text-[#E07800] block">Dev Streak: 7 Days!</span>
+<span class="font-bold text-[11px] text-[#A66E2E] block truncate">42 passing tests logged</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom User Bar -->
+<div class="p-3 border-t-2 border-[#E5E5E5] bg-white flex flex-col gap-2">
+<!-- Status pill -->
+
+<!-- Profile -->
+<div class="flex items-center justify-between px-2 pt-1">
+<div class="flex items-center gap-2.5">
+<img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWq1l8fyqYPSOtILmHtsdpxDVyyhcw95TMF9b9nllVaO3ICqnapAk0IFGIsmq40qOQ3dvl-YQwnzv1e8B-O_UovhGc0xNRaSBDsyJv5ZWBKPoDzOIpBWs5YVtZg6Mt9ftXKwU5hsruPaqTIvgXM2RgbhLtnCk9ORVgUiA_VW9ly4k0WjRaIxbUarg8AVBiT9qKL6_la8pthNYxAEUiXw1CAckDobQ6T8KGdnMnROIFv9hmBigHeyBQ6Q" alt="Hermes Mascot" class="w-9 h-9 object-contain rounded-full border border-black/10 bg-[#FFF7E8] shadow-sm">
+<div class="flex flex-col">
+<span class="text-xs font-black text-[#4B4B4B] leading-tight">Hermes Dev</span>
+<span class="text-[11px] font-bold text-[#AFAFAF]">hermes@local</span>
+</div>
+</div>
+<button class="w-8 h-8 rounded-xl border-2 border-b-4 border-[#E5E5E5] bg-white hover:bg-[#F7F7F7] active:border-b-2 active:translate-y-[2px] flex items-center justify-center text-[#777777] transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">settings</span>
+</button>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<div class="pl-64">
+<!-- Top Bar -->
+<header class="fixed top-0 left-64 right-0 h-16 bg-white border-b-2 border-[#E5E5E5] z-40 flex items-center justify-between px-8">
+<!-- Breadcrumb / Location -->
+<div class="flex items-center gap-2.5 font-bold text-sm"></div>
+<!-- Right Utility Actions with 3D tactile buttons -->
+<div class="flex items-center gap-3">
+<!-- Search bar -->
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-[#AFAFAF] text-[18px]">search</span>
+<input class="h-10 pl-9 pr-3 bg-[#F7F7F7] border-2 border-[#E5E5E5] rounded-xl font-bold text-xs text-[#4B4B4B] placeholder:text-[#AFAFAF] focus:bg-white focus:outline-none focus:border-[#1CB0F6] w-60 transition-all" placeholder="Quick search (Cmd+K)" type="text">
+</div>
+<!-- Node RAM Chip -->
+<div class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border-2 border-b-4 border-[#E5E5E5] font-black text-xs text-[#4B4B4B]">
+<span class="material-symbols-outlined text-[18px] text-[#1CB0F6]">memory</span>
+<span>24% RAM</span>
+</div>
+<!-- Tactile 3D Buttons -->
+<button class="h-10 px-3.5 rounded-xl border-2 border-b-4 border-[#E5E5E5] bg-white hover:bg-[#F7F7F7] text-[#777777] hover:text-[#4B4B4B] font-extrabold text-xs flex items-center gap-1.5 active:border-b-2 active:translate-y-[2px] transition-all" title="Export Thread" type="button">
+<span class="material-symbols-outlined text-[18px]">ios_share</span>
+<span>Export</span>
+</button>
+<button class="h-10 px-3.5 rounded-xl border-2 border-b-4 border-[#E5E5E5] bg-white hover:bg-[#F7F7F7] text-[#777777] hover:text-[#4B4B4B] font-extrabold text-xs flex items-center gap-1.5 active:border-b-2 active:translate-y-[2px] transition-all" title="Settings" type="button">
+<span class="material-symbols-outlined text-[18px]">tune</span>
+<span>Settings</span>
+</button>
+</div>
+</header>
+<!-- Chat & Interaction Canvas -->
+<main class="relative pt-16 min-h-screen bg-[#F7F7F7]">
+<div class="w-full max-w-4xl mx-auto px-6 pt-8 pb-40 flex flex-col gap-8">
+<!-- Friendly Fox Welcome / Prompt Banner -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div class="bg-white rounded-3xl border-2 border-[#E5E5E5] border-b-4 p-5 flex flex-col justify-between shadow-sm relative overflow-hidden"><div class="flex items-start justify-between gap-3"><div class="flex items-center gap-3"><div class="w-11 h-11 rounded-2xl bg-[#E8F8D6] border-2 border-[#58CC02] border-b-4 flex items-center justify-center text-[#46A302] shrink-0"><span class="material-symbols-outlined text-[24px]">hourglass_top</span></div><div><div class="flex items-center gap-2"><h3 class="font-black text-sm text-[#4B4B4B]">Quota Remaining</h3></div></div></div><div class="text-right"><span class="text-xl font-black text-[#46A302] block leading-tight">2h 35m</span><span class="text-[11px] font-extrabold text-[#777777]">of 4h 00m left</span></div></div><div class="mt-4"><div class="flex justify-between items-center text-xs font-extrabold mb-1.5"><span class="text-[#777777]">64% quota available</span><span class="text-[#58CC02] font-black">1h 25m logged</span></div><div class="h-3.5 w-full bg-[#F0F0F0] rounded-full overflow-hidden border border-[#E5E5E5] p-0.5 flex gap-1"><div class="h-full bg-[#58CC02] rounded-full w-[64%] border-b-2 border-[#46A302]"></div><div class="h-full bg-transparent flex-1"></div></div></div></div><div class="bg-white rounded-3xl border-2 border-[#FFD9A0] border-b-4 p-5 flex flex-col justify-between shadow-sm bg-gradient-to-r from-white to-[#FFF7EB]"><div class="flex items-start justify-between gap-3"><div class="flex items-center gap-3"><div class="w-11 h-11 rounded-2xl bg-[#FFF7EB] border-2 border-[#FF9600] border-b-4 flex items-center justify-center text-[#E07800] shrink-0"><span class="material-symbols-outlined text-[24px] animate-pulse">timer</span></div><div><div class="flex items-center gap-2"><h3 class="font-black text-sm text-[#4B4B4B]">Time Till Inactivity</h3></div></div></div><div class="text-right"><div class="flex items-baseline gap-1"><span class="text-2xl font-black text-[#E07800] tracking-tight">08:42</span></div><span class="text-[10px] font-extrabold uppercase tracking-wider text-[#A66E2E]">Until Idle Sleep</span></div></div><div class="mt-4 flex items-center pt-1 border-t-2 border-[#F7F7F7] justify-end"><button class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#FF9600] border-b-4 border-[#E07800] hover:bg-[#E07800] text-white font-black text-xs uppercase tracking-wider shadow-sm active:translate-y-1 active:border-b-0 transition-all" onclick="this.querySelector('span:last-child').textContent = 'Extended!'; setTimeout(() =&gt; this.querySelector('span:last-child').textContent = 'Extended Mode', 2000)" type="button"><span class="material-symbols-outlined text-[18px]">schedule</span><span>Extended Mode</span></button></div></div></div>
+<!-- Date separator pill -->
+<div class="flex items-center justify-center gap-3 select-none my-1">
+<div class="h-0.5 bg-[#E5E5E5] flex-1"></div>
+<span class="px-4 py-1 rounded-full bg-[#E5E5E5] font-black text-[11px] text-[#777777] tracking-wider uppercase">Today · 10:42 AM</span>
+<div class="h-0.5 bg-[#E5E5E5] flex-1"></div>
+</div>
+<!-- Message 1: User Query -->
+<div class="flex gap-3.5 items-start justify-end pl-12 sm:pl-24">
+<div class="flex flex-col items-end">
+<div class="flex items-center gap-2 mb-1.5 mr-1">
+<span class="text-xs font-black text-[#777777]">You</span>
+<span class="text-[11px] font-bold text-[#AFAFAF]">10:42 AM</span>
+</div>
+<!-- Tactile User Bubble -->
+<div class="bg-[#1CB0F6] text-white rounded-3xl rounded-tr-md px-6 py-4 max-w-xl border-b-4 border-[#1899D6] shadow-sm">
+<p class="text-[15px] font-bold leading-relaxed">
+                Can you run the integration test suite and check memory usage on worker nodes?
+              </p>
+</div>
+</div>
+<div class="w-10 h-10 rounded-2xl bg-[#EAF8FF] border-2 border-[#1CB0F6] border-b-4 flex items-center justify-center shrink-0 mt-6 text-[#1CB0F6]">
+<span class="material-symbols-outlined text-[20px]">face</span>
+</div>
+</div>
+<!-- Message 2: Hermes Response Bubble -->
+<div class="flex gap-3.5 items-start pr-8 sm:pr-16">
+<!-- Hermes Fox Avatar -->
+<img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWq1l8fyqYPSOtILmHtsdpxDVyyhcw95TMF9b9nllVaO3ICqnapAk0IFGIsmq40qOQ3dvl-YQwnzv1e8B-O_UovhGc0xNRaSBDsyJv5ZWBKPoDzOIpBWs5YVtZg6Mt9ftXKwU5hsruPaqTIvgXM2RgbhLtnCk9ORVgUiA_VW9ly4k0WjRaIxbUarg8AVBiT9qKL6_la8pthNYxAEUiXw1CAckDobQ6T8KGdnMnROIFv9hmBigHeyBQ6Q" alt="Hermes Mascot" class="w-10 h-10 object-contain rounded-full border-2 border-orange-300 shadow-sm bg-[#FFF7E8] mt-6">
+<div class="flex-1 flex flex-col">
+<div class="flex items-center gap-2.5 mb-2 ml-1">
+<span class="text-sm font-black text-[#4B4B4B]">Hermes</span>
+<span class="px-2 py-0.5 rounded-lg bg-[#58CC02] text-white font-black text-[11px] uppercase tracking-wider">v1.4 core</span>
+<span class="text-[11px] font-bold text-[#AFAFAF]">10:43 AM</span>
+</div>
+<!-- Tactile Assistant Container Card -->
+<div class="bg-white rounded-3xl rounded-tl-md border-2 border-[#E5E5E5] border-b-4 p-6 space-y-5 shadow-sm max-w-2xl">
+<p class="text-[15px] font-bold text-[#4B4B4B] leading-relaxed">
+                Running test suite on branch <span class="font-mono text-xs px-2 py-1 rounded-xl bg-[#F0F0F0] border border-[#E5E5E5] text-[#4B4B4B] font-extrabold">main</span> (commit <code class="text-xs text-[#FF9600] font-black font-mono">f84e2a1</code>). All target microservices responded within SLA parameters!
+              </p>
+<!-- Chunky Duolingo Metric Cards -->
+<div class="grid grid-cols-3 gap-3">
+<!-- Metric 1: Tests Passed -->
+<div class="p-3.5 rounded-2xl bg-[#E8F8D6] border-2 border-[#58CC02] border-b-4 flex flex-col justify-between">
+<span class="font-extrabold text-[11px] uppercase tracking-wider text-[#46A302]">Suite Outcome</span>
+<div class="flex items-baseline gap-1.5 my-1">
+<span class="text-3xl font-black text-[#46A302]">42</span>
+<span class="text-xs font-black text-[#46A302] uppercase">Passed</span>
+</div>
+<span class="text-[11px] font-bold text-[#58CC02]">0 failures · 1 skip</span>
+</div>
+<!-- Metric 2: Cluster Memory -->
+<div class="p-3.5 rounded-2xl bg-[#FFF7EB] border-2 border-[#FF9600] border-b-4 flex flex-col justify-between">
+<span class="font-extrabold text-[11px] uppercase tracking-wider text-[#E07800]">Cluster RAM</span>
+<div class="flex items-baseline gap-1.5 my-1">
+<span class="text-3xl font-black text-[#E07800]">24.1%</span>
+<span class="text-xs font-black text-[#E07800] uppercase">avg</span>
+</div>
+<span class="text-[11px] font-bold text-[#FF9600]">1.92 / 8.00 GB</span>
+</div>
+<!-- Metric 3: Latency -->
+<div class="p-3.5 rounded-2xl bg-[#EAF8FF] border-2 border-[#1CB0F6] border-b-4 flex flex-col justify-between">
+<span class="font-extrabold text-[11px] uppercase tracking-wider text-[#1899D6]">Latency p95</span>
+<div class="flex items-baseline gap-1.5 my-1">
+<span class="text-3xl font-black text-[#1899D6]">38</span>
+<span class="text-xs font-black text-[#1899D6] uppercase">ms</span>
+</div>
+<span class="text-[11px] font-bold text-[#1CB0F6]">Optimal speed</span>
+</div>
+</div>
+<!-- Collapsible Log Card with crisp border -->
+<details class="group bg-[#F7F7F7] border-2 border-[#E5E5E5] rounded-2xl overflow-hidden">
+<summary class="flex items-center justify-between px-4 py-3 cursor-pointer list-none select-none text-[#4B4B4B] hover:bg-[#EFEFEF] transition-colors">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-[#777777] group-open:rotate-90 transition-transform font-bold">chevron_right</span>
+<span class="font-mono text-xs font-black text-[#4B4B4B]">pytest-execution-report.log</span>
+</div>
+<span class="font-mono text-[11px] font-extrabold px-2 py-0.5 rounded-lg bg-white border border-[#E5E5E5] text-[#58CC02]">4.2s run ✓</span>
+</summary>
+<div class="p-4 bg-[#283044] border-t-2 border-[#E5E5E5]">
+<pre class="font-mono text-xs text-[#EAF8FF] leading-relaxed overflow-x-auto"><code>rootdir: /opt/hermes/workers/test-runner
+plugins: xdist-3.5.0, anyio-4.2.0, cov-4.1.0
+collected 42 items
+
+tests/integration/test_pipeline.py ...........                  [ 26%]
+tests/integration/test_memory_pool.py ........                  [ 45%]
+tests/integration/test_worker_heartbeat.py ...............       [ 80%]
+tests/integration/test_telemetry.py ........                    [100%]
+
+==================== 42 passed, 1 warning in 4.21s ====================</code></pre>
+</div>
+</details>
+<p class="text-[14px] font-bold text-[#777777] leading-relaxed">
+                Worker pool nodes <span class="font-mono text-xs text-[#4B4B4B] font-extrabold px-1.5 py-0.5 rounded bg-[#F7F7F7] border border-[#E5E5E5]">node-alpha-0</span> through <span class="font-mono text-xs text-[#4B4B4B] font-extrabold px-1.5 py-0.5 rounded bg-[#F7F7F7] border border-[#E5E5E5]">node-alpha-3</span> report green health status. Ready for deployment scheduling!
+              </p>
+<!-- Action buttons: Duolingo iconic 3D push-button style -->
+<div class="flex flex-wrap items-center gap-3 pt-2">
+<!-- Primary Action: 3D Green Button -->
+<button class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#58CC02] border-b-4 border-[#46A302] hover:bg-[#4EBA02] text-white font-black text-xs uppercase tracking-wider shadow-sm active:translate-y-1 active:border-b-0 transition-all" onclick="appendPrompt('Create release candidate v1.4.1')" type="button">
+<span class="material-symbols-outlined text-[18px]">rocket_launch</span>
+<span>Create Release Candidate</span>
+</button>
+<!-- Secondary Action: 3D White Button -->
+<button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white border-2 border-b-4 border-[#E5E5E5] hover:bg-[#F7F7F7] text-[#4B4B4B] font-extrabold text-xs uppercase tracking-wider shadow-sm active:border-b-2 active:translate-y-[2px] transition-all" onclick="appendPrompt('Show full memory profile breakdown across worker nodes')" type="button">
+<span class="material-symbols-outlined text-[18px] text-[#1CB0F6]">insights</span>
+<span>Memory Breakdown</span>
+</button>
+<!-- Small Copy Icon button -->
+<button class="w-10 h-10 rounded-2xl bg-white border-2 border-b-4 border-[#E5E5E5] hover:bg-[#F7F7F7] text-[#777777] hover:text-[#4B4B4B] flex items-center justify-center active:border-b-2 active:translate-y-[2px] transition-all" title="Copy response" type="button">
+<span class="material-symbols-outlined text-[18px]">content_copy</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Floating Input Dock: Duolingo chunky style -->
+<div class="fixed bottom-0 left-64 right-0 z-30 p-6 pointer-events-none flex justify-center">
+<div class="w-full max-w-3xl pointer-events-auto">
+<div class="bg-white rounded-3xl border-2 border-[#E5E5E5] border-b-4 focus-within:border-[#1CB0F6] p-3 shadow-lg transition-all">
+<!-- Text Input Area -->
+<div class="px-2 pt-1 pb-2">
+<textarea class="w-full bg-transparent resize-none font-bold text-sm text-[#4B4B4B] placeholder:text-[#AFAFAF] focus:outline-none max-h-32 leading-relaxed" id="message-input" oninput="this.style.height = ''; this.style.height = Math.min(this.scrollHeight, 128) + 'px'" placeholder="Message Hermes or ask to write code..." rows="1" style="min-height: 32px; border: medium; outline: medium; box-shadow: none;"></textarea>
+</div>
+<!-- Controls Toolbar -->
+<div class="flex items-center justify-between px-2 pt-2 border-t-2 border-[#F7F7F7]">
+<div class="flex items-center gap-1.5">
+<!-- Attach button -->
+<button class="w-9 h-9 rounded-xl border-2 border-b-4 border-[#E5E5E5] bg-white hover:bg-[#F7F7F7] active:border-b-2 active:translate-y-[2px] text-[#777777] hover:text-[#4B4B4B] flex items-center justify-center transition-all" title="Attach file or context" type="button">
+<span class="material-symbols-outlined text-[20px]">attach_file</span>
+</button>
+<!-- Folder / Repository Button -->
+<button class="w-9 h-9 rounded-xl border-2 border-b-4 border-[#E5E5E5] bg-white hover:bg-[#F7F7F7] active:border-b-2 active:translate-y-[2px] text-[#777777] hover:text-[#4B4B4B] flex items-center justify-center transition-all" title="Select workspace scope" type="button">
+<span class="material-symbols-outlined text-[20px]">folder</span>
+</button>
+<div class="h-5 w-0.5 bg-[#E5E5E5] mx-1"></div>
+<!-- Model Picker Pill -->
+<button class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border-2 border-b-4 border-[#E5E5E5] bg-white hover:bg-[#F7F7F7] active:border-b-2 active:translate-y-[2px] text-[#4B4B4B] font-extrabold text-xs transition-all" type="button">
+<span class="w-2.5 h-2.5 rounded-full bg-[#FF9600]"></span>
+<span>Hermes Ultra 1.4</span>
+<span class="material-symbols-outlined text-[16px] text-[#AFAFAF]">expand_more</span>
+</button>
+</div>
+<!-- Shortcut indicator & 3D Send Button -->
+<div class="flex items-center gap-3">
+<span class="font-extrabold text-[11px] text-[#AFAFAF] select-none hidden sm:inline">⌘ + Enter to send</span>
+<button class="w-11 h-11 rounded-2xl bg-[#58CC02] border-b-4 border-[#46A302] hover:bg-[#4EBA02] text-white flex items-center justify-center active:translate-y-1 active:border-b-0 shadow-sm transition-all" id="send-button" title="Send Message" type="button">
+<span class="material-symbols-outlined text-[22px] font-black">arrow_upward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<script>
+    function appendPrompt(text) {
+      const input = document.getElementById('message-input');
+      if (input) {
+        input.value = text;
+        input.focus();
+        input.dispatchEvent(new Event('input'));
+      }
+    }
+
+    // Keyboard shortcut listener for Cmd+Enter / Ctrl+Enter
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        const input = document.getElementById('message-input');
+        if (input && input.value.trim() !== '') {
+          input.value = '';
+          input.style.height = '32px';
+        }
+      }
+    });
+
+    // Send button click action
+    document.getElementById('send-button')?.addEventListener('click', () => {
+      const input = document.getElementById('message-input');
+      if (input && input.value.trim() !== '') {
+        input.value = '';
+        input.style.height = '32px';
+      }
+    });
+  </script>
+
+
+
+
+</body></html>

@@ -1,0 +1,11 @@
+[Unit]
+Description=Stop Coral Codespaces if its control plane becomes unavailable
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=coral
+WorkingDirectory=/opt/coral
+EnvironmentFile=/etc/coral.env
+Environment=PYTHONPATH=/opt/coral/backend
+ExecStart=/opt/coral/.venv/bin/python -m coral.watchdog

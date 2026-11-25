@@ -1,0 +1,16 @@
+.DS_Store
+.env
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+*.sqlite*
+*.lock
+.build/
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+.coral/
+node_modules/
+native/Config.local.xcconfig
