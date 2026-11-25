@@ -12,16 +12,31 @@ concurrency:
   group: pages
   cancel-in-progress: false
 jobs:
+  build:
+    name: Package Coral website
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Coral
+        uses: actions/checkout@v4
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Verify website entry point
+        run: test -f website/index.html
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          name: github-pages
+          path: website
   deploy:
+    name: Deploy Coral website
+    needs: build
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: website
-      - uses: actions/deploy-pages@v4
+      - name: Deploy Pages artifact
+        uses: actions/deploy-pages@v4
         id: deployment
+        with:
+          artifact_name: github-pages
