@@ -82,8 +82,59 @@ def test_codespace_requires_a_commit_in_a_zero_size_repository(monkeypatch, empt
             asyncio.run(github.bind(profile, repository))
         assert not creates
     else:
-        assert asyncio.run(github.bind(profile, repository)) == "my-codespace"
+        assert asyncio.run(github.bind(profile, repository)) == ("my-codespace", repository)
         assert [request["ref"] for request in creates] == ["main"]
+
+
+def test_binding_existing_codespace_infers_its_repository(monkeypatch):
+    github = GitHub(None)
+
+    async def inspect(profile):
+        assert profile["codespace"] == "known-space"
+        return {"name": "known-space", "owner": {"id": 42}, "repository": {"full_name": "dev/actual-repo"}}
+
+    monkeypatch.setattr(github, "inspect", inspect)
+    assert asyncio.run(github.bind({"github_id": 42}, "", "known-space")) == ("known-space", "dev/actual-repo")
+
+
+def test_agent_tools_are_scoped_to_an_active_hermes_task(tmp_path):
+    import time
+
+    app = create_app(Config(database=str(tmp_path / "db"), demo=True), worker=False)
+    with TestClient(app) as client:
+        user_token = client.post("/auth/local").json()["token"]
+        headers = {"Authorization": "Bearer " + user_token}
+        profile_id = client.get("/profiles", headers=headers).json()["profiles"][0]["id"]
+        assert client.post(f"/profiles/{profile_id}/connect", json={}, headers=headers).status_code == 200
+        db = app.state.db
+        user_id = db.one("SELECT user_id FROM profiles WHERE id=?", (profile_id,))["user_id"]
+        other_profile = "other-profile"
+        db.execute("INSERT INTO profiles(id,user_id,login,github_id,token) VALUES(?,?,?,?,?)",
+                   (other_profile, user_id, "other", 80, "placeholder"))
+        task_id = identifier()
+        now = time.time()
+        db.execute("INSERT INTO tasks(id,profile_id,kind,prompt,status,created,deadline) VALUES(?,?,'hermes','work','running',?,?)",
+                   (task_id, profile_id, now, now + 120))
+        token = app.state.security.issue_agent_token(task_id)
+        agent = {"Authorization": "Bearer " + token}
+
+        assert client.get("/agent/workspace", headers=headers).status_code == 401
+        assert client.get("/agent/workspace", headers=agent).json()["allowance_seconds"] == 14400
+        assert client.get("/profiles", headers=agent).status_code == 401
+        body = {"title": "Daily check", "prompt": "Review workspace", "recurrence": "daily", "next_run": now + 500}
+        schedule = client.post("/agent/schedules", headers=agent, json=body)
+        assert schedule.status_code == 201
+        assert schedule.json()["profile_id"] == profile_id
+        own_id = schedule.json()["id"]
+        assert client.patch(f"/agent/schedules/{own_id}", headers=agent, json={"paused": True}).json()["paused"] == 1
+        retry = client.post("/agent/schedules", headers=agent, json=body).json()
+        assert retry["id"] == own_id and retry["paused"] == 1
+        other_id = client.post(f"/profiles/{other_profile}/schedules", headers=headers, json=body).json()["id"]
+        assert client.patch(f"/agent/schedules/{other_id}", headers=agent, json={"paused": True}).status_code == 404
+        assert client.put(f"/agent/schedules/{other_id}", headers=agent, json=body).status_code == 404
+        assert len(client.get("/agent/schedules", headers=agent).json()["schedules"]) == 1
+        db.execute("UPDATE tasks SET status='succeeded' WHERE id=?", (task_id,))
+        assert client.get("/agent/schedules", headers=agent).status_code == 401
 
 
 def test_duplicate_starts_reserve_one_session(rig):

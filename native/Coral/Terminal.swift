@@ -1,4 +1,10 @@
 import SwiftUI
+
+enum HermesSetup {
+    static let model = "$HOME/.local/bin/hermes model"
+    static let copilot = "$HOME/.local/bin/hermes plugins install github-copilot --enable && $HOME/.local/bin/hermes auth add copilot && $HOME/.local/bin/hermes model"
+}
+
 #if os(macOS)
 import AppKit
 
@@ -11,12 +17,13 @@ final class SSHConsole: ObservableObject {
     private var pipe: Pipe?
 
     static func quote(_ value: String) -> String { "'" + value.replacingOccurrences(of: "'", with: "'\\''") + "'" }
-    static func command(_ profile: Profile, setupHermes: Bool = false) throws -> String {
+    static func command(_ profile: Profile, remoteCommand: String? = nil) throws -> String {
         let allowed = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-"))
         guard !profile.codespace.isEmpty, profile.codespace.unicodeScalars.allSatisfy({ allowed.contains($0) }),
               profile.login.unicodeScalars.allSatisfy({ allowed.contains($0) }) else { throw APIError.message("Invalid Codespace or GitHub account name.") }
         let ssh = "gh auth switch --hostname github.com --user \(quote(profile.login)) && gh codespace ssh --codespace \(quote(profile.codespace)) -- -tt"
-        return setupHermes ? ssh + " " + quote("$HOME/.local/bin/hermes model") : ssh
+        guard let remoteCommand else { return ssh }
+        return ssh + " " + quote(remoteCommand)
     }
     func connect(_ profile: Profile) throws {
         disconnect()
@@ -47,8 +54,8 @@ final class SSHConsole: ObservableObject {
         pipe?.fileHandleForReading.readabilityHandler = nil
         process = nil; input = nil; pipe = nil; running = false
     }
-    func openTerminal(_ profile: Profile, app: String, setupHermes: Bool = false) async throws {
-        let command = try Self.command(profile, setupHermes: setupHermes)
+    func openTerminal(_ profile: Profile, app: String, remoteCommand: String? = nil) async throws {
+        let command = try Self.command(profile, remoteCommand: remoteCommand)
         let file = FileManager.default.temporaryDirectory.appendingPathComponent("Coral-\(UUID().uuidString).command")
         try ("#!/bin/zsh\nexport PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin\n" + command + "\n").write(to: file, atomically: true, encoding: .utf8)
         try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: file.path)
@@ -99,7 +106,7 @@ struct TerminalView: View {
                     }
                     Button("Set up Hermes model") {
                         guard let profile = store.profile else { return }
-                        store.perform { try await ssh.openTerminal(profile, app: store.terminalApp, setupHermes: true) }
+                        store.perform { try await ssh.openTerminal(profile, app: store.terminalApp, remoteCommand: HermesSetup.model) }
                     }.disabled(store.busy || store.profile?.ready != true)
                     #else
                     Text("Use this official GitHub command on a computer with gh installed. On iPhone, execute commands below through your authenticated Coral connection.").font(.caption).foregroundStyle(CoralTheme.muted)

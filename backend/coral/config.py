@@ -16,6 +16,8 @@ class Config:
         os.getenv("CORAL_PUBLIC_URL") or os.getenv("RENDER_EXTERNAL_URL") or "http://127.0.0.1:8000"
     ))
     web_url: str = os.getenv("CORAL_WEB_URL", "http://127.0.0.1:8080")
+    starter_repository: str = os.getenv("CORAL_STARTER_REPOSITORY", "MathObsession/Coral")
+    starter_ref: str = os.getenv("CORAL_STARTER_REF", "workspace-starter")
     demo: bool = os.getenv("CORAL_DEMO", "0") == "1"
     tick_seconds: float = 5
     allowance: int = 4 * 60 * 60

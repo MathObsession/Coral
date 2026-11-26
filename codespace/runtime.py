@@ -50,9 +50,12 @@ def worker(request):
     directory = task_path(request["id"])
     deadline = request["deadline"]
     command = ["bash", "-c", request["prompt"]] if request["kind"] == "terminal" else [str(Path.home() / ".local/bin/hermes"), "chat", "--oneshot", "--query", request["prompt"]]
+    environment = os.environ.copy()
+    if request["kind"] == "hermes" and request.get("agent_token"):
+        environment.update(CORAL_AGENT_URL=request["agent_url"], CORAL_AGENT_TOKEN=request["agent_token"])
     with (directory / "output").open("wb", buffering=0) as output:
         try:
-            process = subprocess.Popen(command, cwd=ROOT, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, start_new_session=True)
+            process = subprocess.Popen(command, cwd=ROOT, env=environment, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, start_new_session=True)
         except OSError:
             (directory / "result").write_text(json.dumps({"status": "failed", "error": "Could not launch the command. Check the workspace path and Hermes installation."}))
             return
@@ -162,8 +165,9 @@ def dispatch(request):
         with (directory / "lock").open("w") as lock:
             fcntl.flock(lock, fcntl.LOCK_EX)
             if not (directory / "pid").exists():
-                encoded = base64.b64encode(json.dumps(request).encode()).decode()
-                child = subprocess.Popen([sys.executable, __file__, "worker", request["id"], encoded], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+                child = subprocess.Popen([sys.executable, __file__, "worker", request["id"]], stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+                with child.stdin as stream:
+                    stream.write(json.dumps(request).encode())
                 (directory / "pid").write_text(str(child.pid))
         return {"status": "running"}
     if operation == "poll":
@@ -187,7 +191,7 @@ if __name__ == "__main__":
         STOP_REQUESTED = True
     signal.signal(signal.SIGTERM, request_stop)
     if len(sys.argv) > 1 and sys.argv[1] == "worker":
-        worker(json.loads(base64.b64decode(sys.argv[3])))
+        worker(json.loads(base64.b64decode(sys.argv[3])) if len(sys.argv) > 3 else json.load(sys.stdin))
     else:
         try:
             print(json.dumps(dispatch(json.loads(sys.stdin.read()))))

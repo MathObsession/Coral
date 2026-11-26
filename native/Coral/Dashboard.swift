@@ -63,7 +63,7 @@ struct SessionControls: View {
                         .buttonStyle(TactileButtonStyle(color: .white)).disabled(store.busy || !(profile.ready || profile.busy))
                 }
             } else if store.profile?.busy != true {
-                Text("Choose a GitHub repository to connect your first workspace.").font(.subheadline).foregroundStyle(CoralTheme.muted)
+                Text("Create a starter workspace or connect an existing Codespace to install Hermes.").font(.subheadline).foregroundStyle(CoralTheme.muted)
                 Button { showProfiles = true } label: { Label("Connect a Codespace", systemImage: "plus.circle.fill") }
                     .buttonStyle(TactileButtonStyle(color: CoralTheme.green)).disabled(store.profile == nil)
             }

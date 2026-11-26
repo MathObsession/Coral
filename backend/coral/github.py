@@ -14,8 +14,9 @@ class GitHubError(RuntimeError):
 
 
 class GitHub:
-    def __init__(self, security):
+    def __init__(self, security, public_url=""):
         self.security = security
+        self.public_url = public_url.rstrip("/")
 
     async def gh(self, profile, *args, stdin=None, timeout=90):
         env = {key: os.environ[key] for key in ("HOME", "PATH", "LANG", "TERM") if key in os.environ}
@@ -55,14 +56,18 @@ class GitHub:
             raise GitHubError("Invalid Codespace name")
         return await self.api(profile, f'user/codespaces/{profile["codespace"]}')
 
-    async def bind(self, profile, repository, codespace=""):
-        repo = await self.api(profile, f"repos/{repository}")
+    async def bind(self, profile, repository, codespace="", reference=""):
         if codespace:
             result = await self.inspect({**profile, "codespace": codespace})
         else:
-            label = "coral-" + profile["id"]
+            repo = await self.api(profile, f"repos/{repository}")
+            label = "coral-" + profile["id"] + ("-ws" if reference else "")
+            def matches(space):
+                return (space.get("display_name") == label and
+                        space.get("repository", {}).get("full_name", "").lower() == repository.lower())
+
             existing = await self.api(profile, "user/codespaces?per_page=100")
-            prior = [s for s in existing.get("codespaces", []) if s.get("display_name") == label]
+            prior = [s for s in existing.get("codespaces", []) if matches(s)]
             if prior:
                 result = prior[0]
             else:
@@ -78,7 +83,7 @@ class GitHub:
                         raise GitHubError("This GitHub repository has no commits. Add a README or another file on GitHub, then connect it again.", 409)
                 try:
                     result = await self.api(profile, "user/codespaces", "POST", {
-                        "repository_id": repo["id"], "ref": repo["default_branch"],
+                        "repository_id": repo["id"], "ref": reference or repo["default_branch"],
                         "display_name": label, "idle_timeout_minutes": 10, "retention_period_minutes": 43200,
                     })
                 except BaseException:
@@ -86,7 +91,7 @@ class GitHub:
                     try:
                         listing = await self.api(profile, "user/codespaces?per_page=100")
                         for space in listing.get("codespaces", []):
-                            if space.get("display_name") == label:
+                            if matches(space):
                                 await self.stop({**profile, "codespace": space["name"]})
                     finally:
                         raise
@@ -97,9 +102,10 @@ class GitHub:
             if not codespace:
                 await self.stop({**profile, "codespace": name})
             raise GitHubError("Codespace must be owned and billed to this profile's GitHub account. Check organization billing policy.")
-        if result["repository"]["full_name"].lower() != repository.lower():
+        connected_repository = result["repository"]["full_name"]
+        if repository and connected_repository.lower() != repository.lower():
             raise GitHubError("The Codespace repository does not match your selection.")
-        return name
+        return name, connected_repository
 
     async def start(self, profile):
         await self.api(profile, f'user/codespaces/{profile["codespace"]}/start', "POST")
@@ -112,18 +118,13 @@ class GitHub:
 
     async def provision(self, profile):
         root = Path(__file__).resolve().parents[2]
-        runtime = base64.b64encode((root / "codespace/runtime.py").read_bytes()).decode()
-        installer = base64.b64encode((root / "codespace/install.sh").read_bytes()).decode()
-        providers = base64.b64encode((root / "codespace/providers.py").read_bytes()).decode()
-        command = (
-            "umask 077; mkdir -p ~/.local/share/coral && "
-            f"printf '%s' {shlex.quote(runtime)} | base64 -d > ~/.local/share/coral/runtime.py && "
-            f"printf '%s' {shlex.quote(installer)} | base64 -d > ~/.local/share/coral/install.sh && "
-            f"printf '%s' {shlex.quote(providers)} | base64 -d > ~/.local/share/coral/providers.py && "
-            "bash ~/.local/share/coral/install.sh > ~/.local/share/coral/hermes-install.log 2>&1"
-        )
+        commands = ["umask 077; mkdir -p ~/.local/share/coral", "cd ~/.local/share/coral"]
+        for filename in ("runtime.py", "install.sh", "providers.py", "agent_tools.py", "agent_tools.yaml"):
+            encoded = base64.b64encode((root / "codespace" / filename).read_bytes()).decode()
+            commands.append(f"printf '%s' {shlex.quote(encoded)} | base64 -d > {filename}")
+        commands.append("bash install.sh > hermes-install.log 2>&1")
         try:
-            await self.gh(profile, "codespace", "ssh", "--codespace", profile["codespace"], "--", "-T", command, timeout=420)
+            await self.gh(profile, "codespace", "ssh", "--codespace", profile["codespace"], "--", "-T", " && ".join(commands), timeout=420)
         except GitHubError as error:
             raise GitHubError("Coral could not prepare Hermes over SSH. Check ~/.local/share/coral/hermes-install.log in the Codespace.", error.status) from None
         result = await self.remote(profile, {"operation": "health"})
@@ -139,6 +140,8 @@ class GitHub:
             raise GitHubError("A valid designated repository is required for workspace access.")
         folder = "/workspaces/" + repository.split("/")[-1]
         command = 'CORAL_WORKSPACE="${CORAL_WORKSPACE:-' + folder + '}" python3 ~/.local/share/coral/runtime.py'
+        if self.public_url and request["operation"] == "run" and request["kind"] == "hermes":
+            request = {**request, "agent_url": self.public_url, "agent_token": self.security.issue_agent_token(request["id"])}
         output = await self.gh(profile, "codespace", "ssh", "--codespace", profile["codespace"], "--", "-T", command, stdin=json.dumps(request).encode(), timeout=30)
         try:
             return json.loads(output)
@@ -154,10 +157,10 @@ class LocalGitHub:
         self.states = {}
         self.processes = {}
 
-    async def bind(self, profile, repository, codespace=""):
+    async def bind(self, profile, repository, codespace="", reference=""):
         name = codespace or "local-" + profile["id"]
         self.states[name] = "Shutdown"
-        return name
+        return name, repository or "local/workspace"
 
     async def inspect(self, profile):
         return {"state": self.states.get(profile["codespace"], "Shutdown")}

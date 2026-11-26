@@ -1,0 +1,9 @@
+name: coral-workspace
+version: "1.0"
+description: Coral scheduling, workspace status, and task history for the active Hermes task.
+provides_tools:
+  - coral_workspace_status
+  - coral_recent_tasks
+  - coral_list_schedules
+  - coral_save_schedule
+  - coral_pause_schedule

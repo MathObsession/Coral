@@ -9,6 +9,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Literal
 from urllib.parse import urlencode
+from uuid import NAMESPACE_URL, uuid5
 import httpx
 from cryptography.fernet import InvalidToken
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
@@ -35,7 +36,7 @@ class OAuthExchange(BaseModel):
 
 
 class ProfileConnect(BaseModel):
-    repository: str = Field(pattern=r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
+    repository: str = Field(default="", pattern=r"^(?:[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)?$")
     codespace: str = Field(default="", pattern=r"^[A-Za-z0-9-]*$")
 
 
@@ -80,12 +81,16 @@ class Schedule(BaseModel):
     paused: bool = False
 
 
+class SchedulePause(BaseModel):
+    paused: bool
+
+
 def create_app(config=None, driver=None, database=None, worker=True):
     config = config or Config()
     config.validate()
     db = database or Database(config.database, config.database_url)
     security = Security(db, config)
-    github = driver or (LocalGitHub(Path(config.database).parent / "workspace") if config.demo else GitHub(security))
+    github = driver or (LocalGitHub(Path(config.database).parent / "workspace") if config.demo else GitHub(security, config.public_url))
     service = Service(db, config, github)
 
     @asynccontextmanager
@@ -157,6 +162,9 @@ def create_app(config=None, driver=None, database=None, worker=True):
 
     def user(authorization: str = Header(default="")):
         return security.authenticate(authorization)
+
+    def agent(authorization: str = Header(default="")):
+        return security.authenticate_agent(authorization)
 
     def oauth_credentials():
         try:
@@ -405,13 +413,18 @@ def create_app(config=None, driver=None, database=None, worker=True):
         service.profile(user_id, profile_id)
         return {"schedules": db.rows("SELECT * FROM schedules WHERE profile_id=? ORDER BY next_run", (profile_id,))}
 
-    def save_schedule(user_id, profile_id, body, schedule_id=None):
+    def save_schedule(user_id, profile_id, body, schedule_id=None, create_id=None):
         service.profile(user_id, profile_id)
         if schedule_id and not db.one("SELECT id FROM schedules WHERE id=? AND profile_id=?", (schedule_id, profile_id)):
             raise HTTPException(404, "Schedule not found.")
         interval = {"daily": 86400, "weekly": 604800}.get(body.recurrence, body.interval_seconds)
-        schedule_id = schedule_id or identifier()
-        db.execute("INSERT INTO schedules VALUES(?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET title=excluded.title,prompt=excluded.prompt,recurrence=excluded.recurrence,next_run=excluded.next_run,interval_seconds=excluded.interval_seconds,duration_limit=excluded.duration_limit,paused=excluded.paused", (schedule_id, profile_id, body.title, body.prompt, body.recurrence, body.next_run, interval, body.duration_limit, int(body.paused)))
+        schedule_id = schedule_id or create_id or identifier()
+        conflict = "DO NOTHING" if create_id else (
+            "DO UPDATE SET title=excluded.title,prompt=excluded.prompt,recurrence=excluded.recurrence,"
+            "next_run=excluded.next_run,interval_seconds=excluded.interval_seconds,duration_limit=excluded.duration_limit,paused=excluded.paused"
+        )
+        db.execute("INSERT INTO schedules VALUES(?,?,?,?,?,?,?,?,?) ON CONFLICT(id) " + conflict,
+                   (schedule_id, profile_id, body.title, body.prompt, body.recurrence, body.next_run, interval, body.duration_limit, int(body.paused)))
         service.wake.set()
         return db.one("SELECT * FROM schedules WHERE id=?", (schedule_id,))
 
@@ -428,6 +441,39 @@ def create_app(config=None, driver=None, database=None, worker=True):
         service.profile(user_id, profile_id)
         db.execute("DELETE FROM schedules WHERE id=? AND profile_id=?", (schedule_id, profile_id))
         return {"deleted": True}
+
+    @app.get("/agent/workspace")
+    async def agent_workspace(scope=Depends(agent)):
+        profile = service.profile(scope["user_id"], scope["profile_id"])
+        counters = service.usage(scope["user_id"], scope["profile_id"])
+        return {"repository": profile["repository"], "state": profile["state"],
+                **{key: counters[key] for key in ("server_time", "allowance_seconds", "used_seconds", "remaining_seconds", "inactivity_seconds")}}
+
+    @app.get("/agent/tasks")
+    async def agent_tasks(scope=Depends(agent)):
+        return {"tasks": db.rows("SELECT id,kind,status,created,finished,schedule_id FROM tasks WHERE profile_id=? ORDER BY created DESC LIMIT 20", (scope["profile_id"],))}
+
+    @app.get("/agent/schedules")
+    async def agent_schedules(scope=Depends(agent)):
+        return await schedules(scope["profile_id"], scope["user_id"])
+
+    @app.post("/agent/schedules", status_code=201)
+    async def agent_add_schedule(body: Schedule, scope=Depends(agent)):
+        schedule_id = str(uuid5(NAMESPACE_URL, "coral-agent-schedule:" + scope["task_id"] + ":" + body.model_dump_json()))
+        return save_schedule(scope["user_id"], scope["profile_id"], body, create_id=schedule_id)
+
+    @app.put("/agent/schedules/{schedule_id}")
+    async def agent_edit_schedule(schedule_id: str, body: Schedule, scope=Depends(agent)):
+        return save_schedule(scope["user_id"], scope["profile_id"], body, schedule_id)
+
+    @app.patch("/agent/schedules/{schedule_id}")
+    async def agent_pause_schedule(schedule_id: str, body: SchedulePause, scope=Depends(agent)):
+        updated = db.one("UPDATE schedules SET paused=? WHERE id=? AND profile_id=? RETURNING *",
+                         (int(body.paused), schedule_id, scope["profile_id"]))
+        if not updated:
+            raise HTTPException(404, "Schedule not found.")
+        service.wake.set()
+        return updated
 
     @app.get("/notifications")
     async def notifications(user_id=Depends(user)):

@@ -2,7 +2,7 @@ import base64
 import hashlib
 import secrets
 import time
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
 from fastapi import HTTPException
 
 
@@ -50,3 +50,26 @@ class Security:
         if not result:
             raise HTTPException(401, "Sign in with GitHub to continue.")
         return result["user_id"]
+
+    def issue_agent_token(self, task_id):
+        return self.seal("coral-hermes-task:" + task_id)
+
+    def authenticate_agent(self, authorization):
+        token = authorization.removeprefix("Bearer ") if authorization.startswith("Bearer ") else ""
+        try:
+            claim = self.open(token, ttl=7200)
+        except InvalidToken:
+            raise HTTPException(401, "Coral tools require an active Hermes task.") from None
+        if not claim.startswith("coral-hermes-task:"):
+            raise HTTPException(401, "Coral tools require an active Hermes task.")
+        now = time.time()
+        result = self.db.one(
+            """SELECT p.id AS profile_id, p.user_id, t.id AS task_id FROM tasks t JOIN profiles p ON p.id=t.profile_id
+               JOIN sessions s ON s.profile_id=p.id
+               WHERE t.id=? AND t.kind='hermes' AND t.status IN ('queued','running') AND t.deadline>?
+               AND p.state='available' AND s.ended IS NULL AND s.deadline>?""",
+            (claim.removeprefix("coral-hermes-task:"), now, now),
+        )
+        if not result:
+            raise HTTPException(401, "The Hermes task or Codespace session has ended.")
+        return result

@@ -21,13 +21,13 @@ struct ProfilesView: View {
                         Button("Stop and disconnect workspace") { store.command("disconnect") }
                             .buttonStyle(TactileButtonStyle(color: .white)).disabled(store.busy || profile.busy)
                     } else {
-                        TextField("Repository (owner/name)", text: $repository).textFieldStyle(.roundedBorder)
+                        TextField("Repository (optional)", text: $repository).textFieldStyle(.roundedBorder)
                         TextField("Existing Codespace name (optional)", text: $codespace).textFieldStyle(.roundedBorder)
-                        Text("Leave the Codespace name empty to create one. GitHub clones the repository and Coral installs Hermes. Setup consumes part of your daily allowance.").font(.caption).foregroundStyle(CoralTheme.muted)
-                        Button("Connect & initialize Hermes") {
+                        Text("Leave both fields empty for a fresh starter workspace. To use an existing Codespace, enter its name. Coral installs Hermes inside the Codespace.").font(.caption).foregroundStyle(CoralTheme.muted)
+                        Button("Connect & install Hermes") {
                             store.command("connect", body: ["repository": trimmedRepository, "codespace": codespace.trimmingCharacters(in: .whitespacesAndNewlines)])
                         }.buttonStyle(TactileButtonStyle(color: CoralTheme.green))
-                            .disabled(trimmedRepository.split(separator: "/").count != 2 || store.busy || store.profile == nil || store.profile?.busy == true)
+                            .disabled((!trimmedRepository.isEmpty && trimmedRepository.split(separator: "/").count != 2) || store.busy || store.profile == nil || store.profile?.busy == true)
                     }
                     if store.busy || store.profile?.state == "starting" { ProgressView("Preparing your workspace…") }
                     if let error = store.profile?.error, !error.isEmpty {

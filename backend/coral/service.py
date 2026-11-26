@@ -100,11 +100,14 @@ class Service:
             profile = self.profile(user_id, profile_id)
             if profile["codespace"]:
                 raise HTTPException(409, "This profile already has a Codespace. Stop and disconnect it before changing repositories.")
+            reference = ""
+            if not repository and not codespace:
+                repository, reference = self.config.starter_repository, self.config.starter_ref
             session, _ = self.reserve_session(profile)
             self.db.execute("UPDATE profiles SET repository=? WHERE id=?", (repository, profile_id))
             try:
-                name = await self.github.bind(profile, repository, codespace)
-                self.db.execute("UPDATE profiles SET repository=?,codespace=? WHERE id=?", (repository, name, profile_id))
+                name, connected_repository = await self.github.bind(profile, repository, codespace, reference)
+                self.db.execute("UPDATE profiles SET repository=?,codespace=? WHERE id=?", (connected_repository, name, profile_id))
                 profile = self.profile(user_id, profile_id)
                 if self.config.demo:
                     await self.activate(profile, session)

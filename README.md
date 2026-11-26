@@ -125,8 +125,8 @@ The `$()` keeps Xcode from interpreting `//` as a comment. Coral stores its own 
 ## Connect Hermes and your Codespace
 
 1. Sign into Coral with the GitHub account that should pay for your Codespace.
-2. Select **Connect a Codespace** on Home or open Profiles and enter `owner/repository`. Leave the Codespace name empty to create one, or enter an existing owned Codespace name. Coral verifies the repository and checks the owner and any billable owner returned by GitHub.
-3. Coral starts or resumes the Codespace, installs its private bridge, and installs Hermes from the official repository. GitHub automatically clones the selected repository. Use Coral's `.devcontainer/devcontainer.json` together with the `codespace/` scripts in that repository, or ensure its existing devcontainer installs an SSH server. The included configuration forwards no public bridge ports. The bridge defaults to `/workspaces/REPOSITORY_NAME`; a custom devcontainer workspace should set `CORAL_WORKSPACE` to its designated repository folder.
+2. Select **Connect a Codespace** on Home or open Profiles. Leave both fields empty for Coral's starter workspace, enter an existing owned Codespace name, or enter `owner/repository` for a project you want to work in. Coral verifies the repository and checks the owner and any billable owner returned by GitHub.
+3. Coral starts or resumes the Codespace, installs its private bridge, and downloads the pinned Hermes release into the Codespace user's home directory. New starter workspaces use the `workspace-starter` branch with an SSH-enabled devcontainer. A custom devcontainer needs an SSH server and can set `CORAL_WORKSPACE` to its designated repository folder. The bridge defaults to `/workspaces/REPOSITORY_NAME`.
 4. Open **Hermes → Model** to choose a provider from the Codespace's Hermes catalog or add an OpenAI-compatible endpoint. For browser sign-in and advanced provider setup, open the Hermes wizard from the Mac app or run:
 
    ```bash

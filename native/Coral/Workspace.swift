@@ -94,11 +94,17 @@ struct ModelProvidersView: View {
                     Text("Use Hermes’ setup wizard for browser sign-in and advanced provider options.")
                         .font(.caption).foregroundStyle(CoralTheme.muted)
                     #if os(macOS)
-                    Button("Open Hermes setup in \(store.terminalApp)", action: openSetup)
+                    Button("Open Hermes setup in \(store.terminalApp)") { openSetup(HermesSetup.model) }
+                    Button("Set up GitHub Copilot") { openSetup(HermesSetup.copilot) }
                     #else
                     if let profile = store.profile {
-                        Text("gh codespace ssh --codespace \(profile.codespace) -- -tt '$HOME/.local/bin/hermes model'")
+                        Text("gh codespace ssh --codespace \(profile.codespace) -- -tt '\(HermesSetup.model)'")
                             .font(.system(.caption, design: .monospaced)).textSelection(.enabled)
+                        DisclosureGroup("Set up GitHub Copilot") {
+                            Link("Open GitHub Codespaces", destination: URL(string: "https://github.com/codespaces")!)
+                            Text("Run this in your Codespace terminal, then complete GitHub device sign-in.")
+                            Text(HermesSetup.copilot).font(.system(.caption, design: .monospaced)).textSelection(.enabled)
+                        }
                     }
                     #endif
                 }
@@ -156,10 +162,10 @@ struct ModelProvidersView: View {
     }
 
     #if os(macOS)
-    private func openSetup() {
+    private func openSetup(_ remoteCommand: String) {
         guard let profile = store.profile else { return }
         Task {
-            do { try await SSHConsole().openTerminal(profile, app: store.terminalApp, setupHermes: true) }
+            do { try await SSHConsole().openTerminal(profile, app: store.terminalApp, remoteCommand: remoteCommand) }
             catch { problem = error.localizedDescription }
         }
     }
