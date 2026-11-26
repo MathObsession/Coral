@@ -11,13 +11,11 @@ services:
       mountPath: /data
       sizeGB: 1
     envVars:
-      - key: GITHUB_CLIENT_ID
+      - key: CORAL_ADMIN_PASSWORD
         sync: false
-      - key: GITHUB_CLIENT_SECRET
+      - key: CORAL_DATABASE_URL
         sync: false
       - key: CORAL_ENCRYPTION_KEY
-        sync: false
-      - key: CORAL_PUBLIC_URL
         sync: false
       - key: CORAL_WEB_URL
         sync: false

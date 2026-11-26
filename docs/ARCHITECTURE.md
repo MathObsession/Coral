@@ -5,6 +5,7 @@ flowchart LR
     Mac[SwiftUI Mac] -->|HTTPS · Coral bearer| Backend[Always-on backend]
     Phone[SwiftUI iPhone] -->|HTTPS · Coral bearer| Backend
     Pages[GitHub Pages dashboard] -->|HTTPS · Coral bearer| Backend
+    Admin[Admin panel] -->|HTTPS · Admin password| Backend
     Backend --> DB[(SQLite or PostgreSQL)]
     Backend -->|OAuth exchange · private secret| OAuth[GitHub OAuth]
     Backend -->|gh API · encrypted account token| GitHub[GitHub Codespaces API]
@@ -22,7 +23,9 @@ flowchart LR
 
 `users` own profiles; profiles retain a GitHub identity, encrypted OAuth token, repository, and Codespace. Every API operation verifies the bearer user owns the selected profile. Bearers are random, hashed in storage, and expire after 30 days. Native clients store their bearer in Keychain. Browser clients use sessionStorage. Logout revokes the presented bearer. OAuth state expires in ten minutes; client-verifier-bound exchange codes expire in one minute and are single-use.
 
-GitHub tokens are encrypted with Fernet and only decrypted inside the backend's GitHub adapter. `gh` receives the token through an environment variable, never a command argument. Profile responses omit privileged fields. The remote bridge has no HTTP listener. Public routes are limited to health, the OAuth flow, and the explicit loopback-only local-development login.
+GitHub account tokens are encrypted with Fernet and decrypted by the backend's GitHub adapter. `gh` receives the token through an environment variable, never a command argument. Profile responses omit privileged fields. The remote bridge has no HTTP listener.
+
+The backend can start before GitHub OAuth is configured. `/admin` is enabled by `CORAL_ADMIN_PASSWORD` and uses a short-lived admin session independent of GitHub sign-in. Saving encrypts both GitHub OAuth app credentials with `CORAL_ENCRYPTION_KEY` and atomically replaces a single database row. On Supabase, the row lives in Coral's private schema with row-level security. OAuth requests read the pair on demand, with environment credentials as the fallback when no saved pair exists.
 
 ## Sessions and accounting
 
@@ -46,6 +49,7 @@ For Render Free, accounts, tokens, schedules, and accounting live in an external
 
 | API | Behavior |
 | --- | --- |
+| `GET/POST /admin`, `POST /admin/login` | Password-protected GitHub OAuth setup |
 | `POST /auth/prepare`, `GET /auth/callback`, `POST /auth/exchange` | GitHub authentication / account linking |
 | `POST /auth/logout` | Revoke current Coral bearer |
 | `GET /profiles` | Profiles without secrets |

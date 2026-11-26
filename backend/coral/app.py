@@ -10,10 +10,12 @@ from pathlib import Path
 from typing import Literal
 from urllib.parse import urlencode
 import httpx
+from cryptography.fernet import InvalidToken
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse, StreamingResponse
 from pydantic import BaseModel, Field
+from .admin import install_admin
 from .config import Config
 from .db import Database
 from .github import GitHub, GitHubError, LocalGitHub
@@ -110,6 +112,7 @@ def create_app(config=None, driver=None, database=None, worker=True):
     app = FastAPI(title="Coral", version="1.0.0", lifespan=lifespan, docs_url="/docs" if config.demo else None, redoc_url=None)
     app.state.service, app.state.db, app.state.security = service, db, security
     app.add_middleware(CORSMiddleware, allow_origins=[config.web_url.rstrip("/").split("/", 3)[0] + "//" + config.web_url.split("/")[2]], allow_credentials=False, allow_methods=["GET", "POST", "PUT", "DELETE"], allow_headers=["Authorization", "Content-Type", "Idempotency-Key"])
+    install_admin(app, config, security)
     rates = defaultdict(deque)
 
     @app.middleware("http")
@@ -120,10 +123,11 @@ def create_app(config=None, driver=None, database=None, worker=True):
             for key in list(rates):
                 if not rates[key] or rates[key][-1] < now - 60:
                     del rates[key]
-        queue = rates[ip]
+        admin_login = request.method == "POST" and request.url.path == "/admin/login"
+        queue = rates[ip, admin_login]
         while queue and queue[0] < now - 60:
             queue.popleft()
-        if len(queue) >= 240:
+        if len(queue) >= (8 if admin_login else 240):
             return JSONResponse({"detail": "Too many requests. Try again shortly."}, 429)
         queue.append(now)
         chunks, size = [], 0
@@ -145,6 +149,15 @@ def create_app(config=None, driver=None, database=None, worker=True):
 
     def user(authorization: str = Header(default="")):
         return security.authenticate(authorization)
+
+    def oauth_credentials():
+        try:
+            credentials = security.github_oauth_credentials()
+        except InvalidToken:
+            raise HTTPException(503, "The saved GitHub OAuth credentials are unreadable. Ask the Coral administrator to save them again.") from None
+        if not credentials:
+            raise HTTPException(503, "GitHub sign-in is awaiting setup. Ask the Coral administrator to configure the GitHub OAuth app.")
+        return credentials
 
     @app.get("/health")
     async def health():
@@ -176,14 +189,14 @@ def create_app(config=None, driver=None, database=None, worker=True):
 
     @app.post("/auth/prepare")
     async def prepare(body: OAuthPrepare, authorization: str = Header(default="")):
-        if not config.client_id:
-            raise HTTPException(503, "Configure a GitHub OAuth app on your backend. Local development is available in Settings.")
+        client_id, _ = oauth_credentials()
         user_id = security.authenticate(authorization) if body.link_account else None
-        state = secrets.token_urlsafe(32)
+        state = secrets.token_urlsafe(32) + "." + digest(client_id)
         db.execute("DELETE FROM oauth WHERE expires<?", (time.time(),))
-        db.execute("INSERT INTO oauth VALUES(?,?,?,?,?,?)", (state, body.challenge, body.client, user_id, time.time() + 600))
+        db.execute("INSERT INTO oauth (state,challenge,client,user_id,expires) VALUES (?,?,?,?,?)",
+                   (state, body.challenge, body.client, user_id, time.time() + 600))
         scope = os.getenv("GITHUB_OAUTH_SCOPES", "codespace")
-        url = "https://github.com/login/oauth/authorize?" + urlencode({"client_id": config.client_id, "redirect_uri": config.public_url + "/auth/callback", "scope": scope, "state": state, "allow_signup": "false"})
+        url = "https://github.com/login/oauth/authorize?" + urlencode({"client_id": client_id, "redirect_uri": config.oauth_callback_url, "scope": scope, "state": state, "allow_signup": "false"})
         return {"url": url}
 
     @app.get("/auth/callback")
@@ -197,8 +210,12 @@ def create_app(config=None, driver=None, database=None, worker=True):
         target = "coral://auth" if attempt["client"] == "native" else config.web_url.rstrip("/") + "/"
         if error or not code:
             return RedirectResponse(target + "?" + urlencode({"error": "GitHub sign-in was cancelled."}), 302)
+        client_id, client_secret = oauth_credentials()
+        _, _, client_fingerprint = state.partition(".")
+        if client_fingerprint and client_fingerprint != digest(client_id):
+            return RedirectResponse(target + "?" + urlencode({"error": "The GitHub OAuth app changed. Start sign-in again."}), 302)
         async with httpx.AsyncClient(timeout=30) as client:
-            result = await client.post("https://github.com/login/oauth/access_token", headers={"Accept": "application/json"}, data={"client_id": config.client_id, "client_secret": config.client_secret, "code": code, "redirect_uri": config.public_url + "/auth/callback"})
+            result = await client.post("https://github.com/login/oauth/access_token", headers={"Accept": "application/json"}, data={"client_id": client_id, "client_secret": client_secret, "code": code, "redirect_uri": config.oauth_callback_url})
             token = result.json().get("access_token")
             if not token:
                 raise HTTPException(401, "GitHub could not complete sign-in.")

@@ -9,17 +9,13 @@ services:
     healthCheckPath: /health
     numInstances: 1
     envVars:
-      - key: GITHUB_CLIENT_ID
-        sync: false
-      - key: GITHUB_CLIENT_SECRET
+      - key: CORAL_ADMIN_PASSWORD
         sync: false
       - key: CORAL_ENCRYPTION_KEY
         sync: false
       - key: CORAL_SCHEDULER_TOKEN
         sync: false
       - key: CORAL_DATABASE_URL
-        sync: false
-      - key: CORAL_PUBLIC_URL
         sync: false
       - key: CORAL_WEB_URL
         value: https://mathobsession.github.io/Coral

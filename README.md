@@ -9,14 +9,14 @@ The supplied design assets are preserved. The apps and dashboard use the existin
 | Component | Location | Runs where |
 | --- | --- | --- |
 | Shared SwiftUI source, macOS/iOS targets, native tests | `native/Coral.xcodeproj` | Xcode / Mac / iPhone |
-| GitHub OAuth, encrypted tokens, sessions, allowance, scheduler | `backend/coral` | Always-on backend |
+| GitHub OAuth setup panel, encrypted tokens, sessions, allowance, scheduler | `backend/coral` | Always-on backend |
 | Static web dashboard | `website/` | GitHub Pages |
 | Private Hermes/file/command bridge | `codespace/runtime.py` | SSH into a Codespace |
 | Hermes installer and SSH server configuration | `codespace/`, `.devcontainer/` | GitHub Codespaces |
-| Deployment blueprint | `render.yaml` | Render Starter with persistent disk |
+| Deployment blueprint | `render.yaml` | Render Starter with Supabase PostgreSQL |
 | Alternative backend and independent shutdown watchdog | `docs/coral*.service`, `docs/coral-watchdog.timer` | Linux/systemd |
 
-**Deployment needs your GitHub OAuth credentials, a backend HTTPS address, a GitHub account with Codespaces billing enabled, and a Hermes model provider configured in the Codespace.** These are not embedded in the clients. This repository has not been deployed or connected to a live GitHub account in the development session. See [verification notes](docs/VERIFICATION.md) for the checks that actually ran.
+The backend starts before GitHub OAuth is configured. To use Coral with a live Codespace, configure GitHub sign-in, use a GitHub account with Codespaces billing enabled, and set up a Hermes model provider inside the Codespace. See [verification notes](docs/VERIFICATION.md) for the checks that actually ran.
 
 ## Run locally
 
@@ -43,7 +43,7 @@ Local sign-in is only available with `CORAL_DEMO=1` and a loopback client. Never
 
 ## Deploy the backend
 
-For **Render Free**, use **New → Web Service** rather than Blueprint and follow [the free deployment instructions](docs/RENDER_FREE.md). That option uses external PostgreSQL and an authenticated external cron job so storage and scheduling do not depend on the free service's ephemeral disk or an open app. The paid persistent-disk alternative below remains available.
+For **Render Free**, create a **New → Web Service** and follow the free deployment instructions. That setup uses Supabase PostgreSQL and an authenticated external cron job. [Render Free setup](docs/RENDER_FREE.md)
 
 1. Create your GitHub repository and push Coral. GitHub operations use `gh`:
 
@@ -57,39 +57,35 @@ For **Render Free**, use **New → Web Service** rather than Blueprint and follo
 
    Choose public visibility if your Pages plan requires it. Keep `.env`, `.coral`, signing files, and build output out of Git. GitHub Pages publishing from a private repository depends on your GitHub plan.
 
-2. In Render, create a Blueprint from this repository using `render.yaml`. Keep the **Starter** always-on plan, one instance, and its persistent `/data` disk. A service that sleeps cannot execute the scheduler while your apps are closed. The Docker build context is the repository root.
+2. In Render, create a Blueprint from this repository using `render.yaml`. Keep the **Starter** plan, one instance, and the `/data` disk. The Docker build context is the repository root. Get your Supabase **Session pooler** PostgreSQL URI using the database setup instructions. [Supabase setup](docs/RENDER_FREE.md#1-create-the-persistent-database)
 
-3. Register a GitHub OAuth App in **GitHub → Settings → Developer settings → OAuth Apps**. Set the authorization callback URL to:
-
-   ```text
-   https://YOUR_BACKEND/auth/callback
-   ```
-
-4. Set the backend environment values from `.env.example`:
+3. In **Render → Service → Environment**, set the backend values from `.env.example`.
 
    ```text
-   GITHUB_CLIENT_ID=your-oauth-app-id
-   GITHUB_CLIENT_SECRET=your-oauth-app-secret
+   CORAL_ADMIN_PASSWORD=your-admin-password
    CORAL_ENCRYPTION_KEY=your-generated-fernet-key
-   CORAL_PUBLIC_URL=https://YOUR_BACKEND
+   CORAL_DATABASE_URL=your-private-supabase-postgresql-uri
    CORAL_WEB_URL=https://YOUR_ACCOUNT.github.io/Coral
    CORAL_DATABASE=/data/coral.sqlite
    CORAL_DEMO=0
    ```
 
-   Generate the encryption key once, preserve it in your secret manager, and back it up with the database:
+   Render supplies the service URL at startup. Set `CORAL_PUBLIC_URL` if you use a custom domain or run the backend on another host. Generate the encryption key once, keep it in your secret manager, and generate a separate password for the admin panel.
 
    ```bash
    python3 -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'
+   python3 -c 'import secrets; print(secrets.token_urlsafe(32))'
    ```
 
-   Rotating this key without re-encrypting stored tokens makes existing profile credentials unusable; reconnect the profiles if you intentionally replace it.
+4. Deploy the backend and open `https://YOUR_BACKEND/admin`. Sign in with `CORAL_ADMIN_PASSWORD`. The panel shows the dashboard homepage and `https://YOUR_BACKEND/auth/callback`. Use those URLs when you register the app under **GitHub → Settings → Developer settings → OAuth Apps**. Generate a client secret, paste it and the Client ID into the panel, and save. Coral encrypts both values in its PostgreSQL database and uses them for subsequent sign-ins immediately.
 
 5. The default OAuth scope is `codespace`, for Codespace management. For private repositories, opt into `GITHUB_OAUTH_SCOPES=codespace,repo` and sign in again. OAuth `repo` is broad; use it only when private repository access is needed. GitHub identity comes from `/user`, without requiring email access.
 
 6. Verify `https://YOUR_BACKEND/health`. The response should report `production`. Configure both apps and the dashboard with this backend address.
 
-The backend must use one Uvicorn worker. A database lock prevents two scheduler processes from running against one database. SQLite WAL storage retains tasks, schedule occurrences, results, and usage through restarts. Use provider disk snapshots/SQLite online backups for disaster recovery; do not copy an active SQLite file without its WAL.
+The backend uses one Uvicorn worker. Existing deployments can keep `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` in the environment while moving to the panel. The pair saved in the database takes precedence. Unset `CORAL_ADMIN_PASSWORD` to disable the panel after setup. Keep `CORAL_ENCRYPTION_KEY` across deploys to retain access to saved OAuth credentials and profile tokens.
+
+Self-hosted and existing Starter deployments can use SQLite on a persistent disk by leaving `CORAL_DATABASE_URL` unset. Set up an explicit data migration before switching an existing instance to PostgreSQL if you need to carry over its accounts and schedules.
 
 ### Independent watchdog option
 

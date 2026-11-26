@@ -1,5 +1,5 @@
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -9,9 +9,12 @@ class Config:
     scheduler_token: str = os.getenv("CORAL_SCHEDULER_TOKEN", "")
     hosting_mode: str = os.getenv("CORAL_HOSTING_MODE", "standard")
     encryption_key: str = os.getenv("CORAL_ENCRYPTION_KEY", "")
+    admin_password: str = os.getenv("CORAL_ADMIN_PASSWORD", "")
     client_id: str = os.getenv("GITHUB_CLIENT_ID", "")
     client_secret: str = os.getenv("GITHUB_CLIENT_SECRET", "")
-    public_url: str = os.getenv("CORAL_PUBLIC_URL", "http://127.0.0.1:8000")
+    public_url: str = field(default_factory=lambda: (
+        os.getenv("CORAL_PUBLIC_URL") or os.getenv("RENDER_EXTERNAL_URL") or "http://127.0.0.1:8000"
+    ))
     web_url: str = os.getenv("CORAL_WEB_URL", "http://127.0.0.1:8080")
     demo: bool = os.getenv("CORAL_DEMO", "0") == "1"
     tick_seconds: float = 5
@@ -20,10 +23,14 @@ class Config:
     max_extension: int = 120 * 60
     stop_reserve: int = 30
 
+    @property
+    def oauth_callback_url(self):
+        return self.public_url.rstrip("/") + "/auth/callback"
+
     def validate(self):
+        if not self.encryption_key and (not self.demo or self.admin_password):
+            raise RuntimeError("Configure CORAL_ENCRYPTION_KEY. See README.")
         if not self.demo:
-            if not all((self.encryption_key, self.client_id, self.client_secret)):
-                raise RuntimeError("Configure CORAL_ENCRYPTION_KEY and GitHub OAuth credentials. See README.")
             if not self.public_url.startswith("https://") or not self.web_url.startswith("https://"):
                 raise RuntimeError("Production requires HTTPS backend and dashboard URLs.")
             if self.hosting_mode == "render-free":

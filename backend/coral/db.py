@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS profiles(
  hermes INTEGER NOT NULL DEFAULT 0, error TEXT NOT NULL DEFAULT '', UNIQUE(user_id,github_id));
 CREATE UNIQUE INDEX IF NOT EXISTS bound_codespace ON profiles(codespace) WHERE codespace != '';
 CREATE TABLE IF NOT EXISTS auth_tokens(hash TEXT PRIMARY KEY,user_id TEXT NOT NULL REFERENCES users(id),expires REAL NOT NULL);
+CREATE TABLE IF NOT EXISTS github_oauth_credentials(
+ id INTEGER PRIMARY KEY CHECK (id=1), client_id TEXT NOT NULL, client_secret TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS oauth(state TEXT PRIMARY KEY,challenge TEXT NOT NULL,client TEXT NOT NULL,user_id TEXT,expires REAL NOT NULL);
 CREATE TABLE IF NOT EXISTS exchanges(code TEXT PRIMARY KEY,user_id TEXT NOT NULL,challenge TEXT NOT NULL,expires REAL NOT NULL);
 CREATE TABLE IF NOT EXISTS sessions(

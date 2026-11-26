@@ -316,7 +316,7 @@ def test_one_use_oauth_code_is_verifier_bound(tmp_path):
         assert client.post("/auth/exchange", json={"code": "code" * 10, "verifier": verifier}).status_code == 401
 
 
-def test_production_rejects_missing_credentials_and_http():
+def test_production_requires_encryption_key_and_https():
     with pytest.raises(RuntimeError): create_app(Config(demo=False, encryption_key="", client_id="", client_secret=""), worker=False)
     with pytest.raises(RuntimeError): create_app(Config(demo=False, encryption_key=Fernet.generate_key().decode(), client_id="id", client_secret="secret"), worker=False)
 

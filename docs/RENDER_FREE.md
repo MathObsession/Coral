@@ -7,7 +7,7 @@ The free deployment uses three services:
 | Service | Role |
 | --- | --- |
 | Render Free Web Service | Python backend, GitHub OAuth, `gh`, Codespace controls, task workers |
-| External free PostgreSQL, such as Supabase | Persistent accounts, encrypted tokens, usage, schedules, and results |
+| External free PostgreSQL, such as Supabase | Persistent accounts, encrypted OAuth credentials and tokens, usage, schedules, and results |
 | cron-job.org | Authenticated scheduling/shutdown check every minute, independently of your apps |
 
 GitHub Pages continues to host the static dashboard. Your Mac can be off. Each provider's free quotas and availability still apply. GitHub Codespaces compute and Hermes inference have their own billing.
@@ -49,19 +49,17 @@ On https://render.com/ choose **New → Web Service**, connect GitHub, and selec
 | Instance Type | Free |
 | Health Check Path | `/health` |
 
-The Dockerfile supplies the command and listens on port 8000. Do not add a disk. Use one instance and one Uvicorn worker. Copy the service's assigned HTTPS URL once Render displays it.
+The Dockerfile supplies the command and listens on port 8000. Do not add a disk. Use one instance and one Uvicorn worker. Render passes the assigned HTTPS URL to Coral at startup as `RENDER_EXTERNAL_URL`.
 
 ## 3. Set the backend environment
 
 In **Render → Service → Environment**, set:
 
 ```env
-GITHUB_CLIENT_ID=YOUR_GITHUB_OAUTH_APP_CLIENT_ID
-GITHUB_CLIENT_SECRET=YOUR_GITHUB_OAUTH_APP_CLIENT_SECRET
+CORAL_ADMIN_PASSWORD=YOUR_RANDOM_ADMIN_PASSWORD
 CORAL_ENCRYPTION_KEY=YOUR_FERNET_KEY
 CORAL_DATABASE_URL=YOUR_PRIVATE_POSTGRESQL_CONNECTION_URI
 CORAL_SCHEDULER_TOKEN=YOUR_RANDOM_SCHEDULER_SECRET
-CORAL_PUBLIC_URL=https://YOUR_RENDER_SERVICE.onrender.com
 CORAL_WEB_URL=https://mathobsession.github.io/Coral
 CORAL_DATABASE=/tmp/coral/control-plane.sqlite
 CORAL_HOSTING_MODE=render-free
@@ -71,23 +69,26 @@ GITHUB_OAUTH_SCOPES=codespace
 
 `CORAL_DATABASE` supplies a local worker-lock path in this mode. Application data lives in the external PostgreSQL database, not in this local path. Free mode deliberately refuses to start without external storage and a scheduler secret, preventing accidental loss/reset of usage or authentication after a restart.
 
-Generate the two secrets locally:
+Set `CORAL_PUBLIC_URL` only if you want Coral to use a custom HTTPS domain for OAuth callbacks.
+
+Generate an encryption key and two separate secrets locally.
 
 ```bash
 python3 -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'
 python3 -c 'import secrets; print(secrets.token_urlsafe(48))'
+python3 -c 'import secrets; print(secrets.token_urlsafe(32))'
 ```
 
-Use the first value for `CORAL_ENCRYPTION_KEY` and the second for `CORAL_SCHEDULER_TOKEN`. Preserve the encryption key across redeployments. Do not place either secret, the database URI, or the GitHub client secret in the Pages website or app source.
+Use the values in order for `CORAL_ENCRYPTION_KEY`, `CORAL_SCHEDULER_TOKEN`, and `CORAL_ADMIN_PASSWORD`. Preserve the encryption key across redeployments. Save the environment and deploy.
 
-In your GitHub OAuth application, set:
+Once Render displays the service URL, open `/admin` on that address and enter the password from Render. The panel shows the URLs to use when creating or updating your app in **GitHub → Settings → Developer settings → OAuth Apps**.
 
 ```text
-Homepage: https://mathobsession.github.io/Coral/
-Callback: https://YOUR_RENDER_SERVICE.onrender.com/auth/callback
+Homepage URL = https://mathobsession.github.io/Coral
+Authorization callback URL = https://YOUR_RENDER_SERVICE.onrender.com/auth/callback
 ```
 
-Save the environment and redeploy. A service created before these required values are configured can report a startup failure; finish the configuration and redeploy it. For private repositories, use `GITHUB_OAUTH_SCOPES=codespace,repo` and authenticate again.
+Generate a client secret in GitHub, paste the Client ID and Client Secret into the panel, and select **Save credentials**. Coral encrypts both values in Supabase. The next GitHub sign-in uses the saved pair without a Render redeploy. For private repositories, use `GITHUB_OAUTH_SCOPES=codespace,repo` and authenticate again.
 
 ## 4. Configure the external scheduler
 
@@ -125,8 +126,8 @@ In the Pages dashboard and both native apps, save the Render URL as the backend 
 
 Test a one-time scheduled task while both apps are closed and the Mac is off. Confirm the persisted result, shared daily usage, and Codespace shutdown. Redeploy the backend and confirm profiles, usage, and schedules remain present. Restart recovery intentionally fails uncertain in-flight executions and stops their Codespaces; it never blindly replays a command.
 
-The existing API/native contract remains unchanged. SQLite is still supported for local development and the paid persistent-disk option. Existing SQLite data is not automatically migrated into PostgreSQL; a fresh free deployment starts its own database. Stop old sessions before switching deployments so daily accounting is not reset mid-session.
+If you are switching from SQLite, plan a separate data migration to carry accounts, schedules, and usage into PostgreSQL. Stop active sessions before switching deployments.
 
 ## Verification limits
 
-The PostgreSQL driver, SQL compatibility, secure scheduler trigger, and free-mode configuration checks have local tests. A separate opt-in integration test runs against `CORAL_TEST_DATABASE_URL`. The hosted connection and external cron delivery still require your provider credentials and a live deployment. Current Render documentation could not be fetched in the development sandbox because outbound DNS failed; verify current free-plan quotas in the provider dashboard.
+Local tests cover encrypted OAuth storage, credential rotation, the sign-in flow with mocked GitHub responses, and the PostgreSQL schema and scheduler trigger. A separate opt-in storage integration test runs against `CORAL_TEST_DATABASE_URL`. To verify the live setup, sign in through your registered GitHub OAuth app and check your external scheduler's delivery history.

@@ -25,7 +25,19 @@ def test_free_hosting_refuses_ephemeral_database_fallback():
         production_config(database_url="").validate()
     with pytest.raises(RuntimeError, match="CORAL_SCHEDULER_TOKEN"):
         production_config(scheduler_token="short").validate()
-    production_config().validate()
+    production_config(client_id="", client_secret="", admin_password="test-admin-password").validate()
+
+
+def test_render_supplies_public_url_until_explicitly_overridden(monkeypatch):
+    monkeypatch.delenv("CORAL_PUBLIC_URL", raising=False)
+    monkeypatch.setenv("RENDER_EXTERNAL_URL", "https://coral-new.onrender.com")
+    config = Config(demo=False, hosting_mode="standard", encryption_key=Fernet.generate_key().decode(),
+                    web_url="https://mathobsession.github.io/Coral")
+    config.validate()
+    assert config.oauth_callback_url == "https://coral-new.onrender.com/auth/callback"
+
+    monkeypatch.setenv("CORAL_PUBLIC_URL", "https://backend.example.com/")
+    assert Config().oauth_callback_url == "https://backend.example.com/auth/callback"
 
 
 def test_postgres_preserves_timestamp_precision_and_domain_constraints():
@@ -50,6 +62,7 @@ def test_supabase_backend_tables_are_private_and_use_rls():
     assert "REVOKE ALL ON SCHEMA coral FROM PUBLIC" in statements
     assert "ALTER TABLE coral.profiles ENABLE ROW LEVEL SECURITY" in statements
     assert "ALTER TABLE coral.auth_tokens ENABLE ROW LEVEL SECURITY" in statements
+    assert "ALTER TABLE coral.github_oauth_credentials ENABLE ROW LEVEL SECURITY" in statements
     assert "ALTER TABLE coral.usage ENABLE ROW LEVEL SECURITY" in statements
 
 
