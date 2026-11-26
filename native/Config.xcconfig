@@ -1,4 +1,4 @@
-// Set to your deployed backend before archiving. Config.local.xcconfig is ignored by Git.
-CORAL_BACKEND_URL = http:/$()/127.0.0.1:8000
+// Config.local.xcconfig can override the default backend.
+CORAL_BACKEND_URL = https:/$()/coral-api-z7k8.onrender.com
 ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon
 #include? "Config.local.xcconfig"

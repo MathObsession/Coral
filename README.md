@@ -35,9 +35,9 @@ In another terminal:
 python3 -m http.server 8080 --bind 127.0.0.1 --directory website
 ```
 
-Open `http://127.0.0.1:8080`. In Settings, select **Open local workspace**. In Profiles, enter `local/workspace` and connect. The local backend uses `.coral/workspace` and enforces the same session rules. You can create a file, save it, and execute `cat filename`. Local mode performs real operations; it does not synthesize Hermes responses. AI tasks return a configuration error until you use a real Codespace.
+Open `http://127.0.0.1:8080`. In Settings, set the backend URL to `http://127.0.0.1:8000`, save, and select **Open local workspace**. In Profiles, enter `local/workspace` and connect. The local backend uses `.coral/workspace` and enforces the same session rules. You can create a file, save it, and execute `cat filename`. Local mode performs real operations; it does not synthesize Hermes responses. AI tasks return a configuration error until you use a real Codespace.
 
-For the native app, open `native/Coral.xcodeproj` in Xcode. Select **Coral-macOS → My Mac** or **Coral-iOS → an iPhone simulator**, then Run. Use Settings → Open local workspace. On a physical iPhone, configure your deployed HTTPS backend; its `localhost` refers to the phone.
+For the native app, open `native/Coral.xcodeproj` in Xcode. Select **Coral-macOS → My Mac** or **Coral-iOS → an iPhone simulator**, then Run. Enter `http://127.0.0.1:8000` in Settings and select **Open local workspace**. On a physical iPhone, use the deployed HTTPS backend.
 
 Local sign-in is only available with `CORAL_DEMO=1` and a loopback client. Never deploy local mode. The local script stores its encryption key in the ignored `.coral/local-key` so restarts retain decryptable credentials.
 

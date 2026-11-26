@@ -2,13 +2,13 @@
 
 Use **New → Web Service**, with **Docker** and the **Free** instance type. You do not need to create a Blueprint. `render.free.yaml` records the equivalent settings; the original `render.yaml` remains the optional paid persistent-disk deployment.
 
-The free deployment uses three services:
+The free deployment uses the following components:
 
 | Service | Role |
 | --- | --- |
 | Render Free Web Service | Python backend, GitHub OAuth, `gh`, Codespace controls, task workers |
 | External free PostgreSQL, such as Supabase | Persistent accounts, encrypted OAuth credentials and tokens, usage, schedules, and results |
-| cron-job.org | Authenticated scheduling/shutdown check every minute, independently of your apps |
+| Supabase Cron or cron-job.org | Authenticated scheduling and shutdown check every minute, independently of your apps |
 
 GitHub Pages continues to host the static dashboard. Your Mac can be off. Each provider's free quotas and availability still apply. GitHub Codespaces compute and Hermes inference have their own billing.
 
@@ -92,7 +92,9 @@ Generate a client secret in GitHub, paste the Client ID and Client Secret into t
 
 ## 4. Configure the external scheduler
 
-Create a free account at https://cron-job.org/. Add a cron job with:
+The Coral deployment uses Supabase Cron with `pg_net` for the one-minute check. The job reads its URL and token from Supabase Vault and sends the request described below.
+
+For a deployment using cron-job.org, create a free account and add a cron job with the following settings.
 
 | Setting | Value |
 | --- | --- |

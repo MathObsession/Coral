@@ -1,2 +1,2 @@
 // Public backend address only. No credentials belong in this file.
-window.CORAL_CONFIG = { backendURL: "http://127.0.0.1:8000" };
+window.CORAL_CONFIG = { backendURL: "https://coral-api-z7k8.onrender.com" };
