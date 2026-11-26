@@ -1,0 +1,11 @@
+{
+  "name": "Coral · Hermes workspace",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/sshd:1": { "version": "latest" },
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "remoteEnv": { "CORAL_WORKSPACE": "${containerWorkspaceFolder}" },
+  "customizations": { "vscode": { "settings": { "files.exclude": { "**/.env": true } } } },
+  "forwardPorts": []
+}
