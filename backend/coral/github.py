@@ -104,10 +104,12 @@ class GitHub:
         root = Path(__file__).resolve().parents[2]
         runtime = base64.b64encode((root / "codespace/runtime.py").read_bytes()).decode()
         installer = base64.b64encode((root / "codespace/install.sh").read_bytes()).decode()
+        providers = base64.b64encode((root / "codespace/providers.py").read_bytes()).decode()
         command = (
             "umask 077; mkdir -p ~/.local/share/coral && "
             f"printf '%s' {shlex.quote(runtime)} | base64 -d > ~/.local/share/coral/runtime.py && "
             f"printf '%s' {shlex.quote(installer)} | base64 -d > ~/.local/share/coral/install.sh && "
+            f"printf '%s' {shlex.quote(providers)} | base64 -d > ~/.local/share/coral/providers.py && "
             "bash ~/.local/share/coral/install.sh > ~/.local/share/coral/hermes-install.log 2>&1"
         )
         try:

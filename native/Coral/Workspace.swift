@@ -3,12 +3,15 @@ import SwiftUI
 struct WorkspaceView: View {
     @EnvironmentObject var store: CoralStore
     @State private var prompt = ""
+    @State private var showModel = false
     var body: some View {
         VStack(spacing: 0) {
             HStack {
                 Mascot(size: 40)
                 VStack(alignment: .leading) { Text("Hermes").font(.headline); Text(store.profile?.hermes == 1 ? "Ready for your next task" : "Agent is stopped").font(.caption).foregroundStyle(CoralTheme.muted) }
                 Spacer()
+                Button { showModel = true } label: { Label("Model", systemImage: "slider.horizontal.3") }
+                    .buttonStyle(TactileButtonStyle(color: .white))
                 Button(store.profile?.hermes == 1 ? "Stop Hermes" : "Start Hermes") { store.command("hermes", body: ["enabled": store.profile?.hermes != 1]) }
                     .buttonStyle(TactileButtonStyle(color: .white)).disabled(store.busy || store.profile?.ready != true)
             }.padding(20).background(.white)
@@ -32,12 +35,134 @@ struct WorkspaceView: View {
                         .disabled(prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || store.busy || store.profile?.ready != true || store.profile?.hermes != 1 || store.tasks.contains(where: \.active))
                 }
             }.padding(20).background(.white).overlay(alignment: .top) { Rectangle().fill(CoralTheme.border).frame(height: 2) }
-        }.background(CoralTheme.canvas)
+        }.background(CoralTheme.canvas).sheet(isPresented: $showModel) {
+            NavigationStack { ModelProvidersView() }
+                #if os(macOS)
+                .frame(minWidth: 570, minHeight: 440)
+                #endif
+        }
     }
     func send() {
         let submitted = prompt
         store.run(submitted) { if prompt == submitted { prompt = "" } }
     }
+}
+
+struct ModelProvidersView: View {
+    @EnvironmentObject var store: CoralStore
+    @Environment(\.dismiss) private var dismiss
+    @State private var catalog: HermesProvidersResponse?
+    @State private var selection = ""
+    @State private var model = ""
+    @State private var endpoint = ""
+    @State private var endpointName = ""
+    @State private var key = ""
+    @State private var saving = false
+    @State private var status: String?
+    @State private var problem: String?
+
+    private var newEndpoint: Bool { selection == "new-custom" }
+    private var option: HermesProviderOption? { catalog?.providers.first { $0.id == selection } }
+
+    var body: some View {
+        Form {
+            if store.profile?.ready != true {
+                Text("Start the Codespace to change its Hermes model settings.")
+            } else if let catalog {
+                Section("Provider") {
+                    Picker("Provider", selection: Binding(get: { selection }, set: choose)) {
+                        Text("Choose a provider").tag("")
+                        ForEach(catalog.providers) { Text($0.name).tag($0.id) }
+                        Text("Add OpenAI-compatible endpoint…").tag("new-custom")
+                    }
+                    if newEndpoint {
+                        TextField("Endpoint name", text: $endpointName)
+                        TextField("Base URL (for example https://example.com/v1)", text: $endpoint)
+                    }
+                    if !selection.isEmpty { TextField("Model ID", text: $model) }
+                    if newEndpoint || (option?.interactive == false && option?.keyEnv.isEmpty == false) {
+                        SecureField("API key (optional)", text: $key)
+                        Text("Coral saves the key inside this Codespace. For a key already configured in Hermes, leave the field blank.")
+                            .font(.caption).foregroundStyle(CoralTheme.muted)
+                    }
+                    Button("Save model", action: save)
+                        .disabled(saving || selection.isEmpty || model.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                                  (newEndpoint && (endpoint.isEmpty || endpointName.isEmpty)))
+                }.disabled(saving)
+                Section("Hermes setup") {
+                    Text("Use Hermes’ setup wizard for browser sign-in and advanced provider options.")
+                        .font(.caption).foregroundStyle(CoralTheme.muted)
+                    #if os(macOS)
+                    Button("Open Hermes setup in \(store.terminalApp)", action: openSetup)
+                    #else
+                    if let profile = store.profile {
+                        Text("gh codespace ssh --codespace \(profile.codespace) -- -tt '$HOME/.local/bin/hermes model'")
+                            .font(.system(.caption, design: .monospaced)).textSelection(.enabled)
+                    }
+                    #endif
+                }
+            } else if problem == nil {
+                ProgressView("Loading Hermes providers…")
+            } else {
+                Button("Retry") { Task { await load() } }
+            }
+            if let status { Text(status).foregroundStyle(CoralTheme.muted) }
+            if let problem { Label(problem, systemImage: "exclamationmark.circle").foregroundStyle(CoralTheme.red) }
+        }
+        .formStyle(.grouped).navigationTitle("Hermes model provider")
+        .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+        .task(id: store.profile?.ready) {
+            if store.profile?.ready == true { await load() }
+        }
+    }
+
+    private func choose(_ id: String) {
+        selection = id
+        model = id == catalog?.selected ? catalog?.model ?? "" : ""
+        key = ""
+        status = nil
+        problem = nil
+    }
+
+    private func load() async {
+        problem = nil
+        do {
+            let result: HermesProvidersResponse = try await store.api.request(store.root + "/hermes/providers")
+            catalog = result
+            choose(result.providers.contains { $0.id == result.selected } ? result.selected : "")
+        } catch {
+            problem = error.localizedDescription
+        }
+    }
+
+    private func save() {
+        saving = true
+        status = nil
+        problem = nil
+        let path = store.root + "/hermes/provider"
+        let body = ["provider": selection, "model": model, "name": endpointName, "base_url": endpoint, "api_key": key]
+        Task {
+            defer { saving = false }
+            do {
+                _ = try await store.api.raw(path, method: "PUT", body: body)
+                key = ""
+                await load()
+                status = "Model saved in this Codespace. Send a task to test the provider."
+            } catch {
+                problem = error.localizedDescription
+            }
+        }
+    }
+
+    #if os(macOS)
+    private func openSetup() {
+        guard let profile = store.profile else { return }
+        Task {
+            do { try await SSHConsole().openTerminal(profile, app: store.terminalApp, setupHermes: true) }
+            catch { problem = error.localizedDescription }
+        }
+    }
+    #endif
 }
 
 struct TaskCard: View {

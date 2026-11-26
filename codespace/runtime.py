@@ -91,8 +91,31 @@ def worker(request):
         (directory / "result").write_text(json.dumps(result))
 
 
+def provider_request(request):
+    coral_dir = Path(__file__).resolve().parent
+    launcher = Path.home() / ".local/bin/hermes"
+    bootstrap = (
+        "import sys, runpy; sys.path.insert(0, sys.argv[1]); "
+        "sys._hermes_pin_default_home = True; import hermes_bootstrap; "
+        "runpy.run_path(sys.argv[2], run_name='__main__')"
+    )
+    try:
+        with (STATE / "provider.lock").open("w") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            command = subprocess.run([str(launcher), "--print-runtime-command"], capture_output=True, check=True, timeout=5)
+            interpreter = json.loads(command.stdout)[0]
+            result = subprocess.run([interpreter, "-I", "-c", bootstrap, str(coral_dir / "hermes-agent"),
+                                     str(coral_dir / "providers.py")], input=json.dumps(request).encode(),
+                                    capture_output=True, check=True, timeout=20)
+            return json.loads(result.stdout)
+    except (OSError, ValueError, IndexError, subprocess.SubprocessError):
+        return {"error": "Could not open Hermes provider settings. Resume the Codespace to refresh its bridge."}
+
+
 def dispatch(request):
     operation = request["operation"]
+    if operation in ("provider_options", "set_provider"):
+        return provider_request(request)
     if operation == "health":
         hermes = Path.home() / ".local/bin/hermes"
         return {"installed": hermes.is_file() and os.access(hermes, os.X_OK), "workspace": str(ROOT),

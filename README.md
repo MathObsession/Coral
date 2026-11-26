@@ -127,11 +127,11 @@ The `$()` keeps Xcode from interpreting `//` as a comment. Coral stores its own 
 1. Sign into Coral with the GitHub account that should pay for your Codespace.
 2. Select **Connect a Codespace** on Home or open Profiles and enter `owner/repository`. Leave the Codespace name empty to create one, or enter an existing owned Codespace name. Coral verifies the repository and checks the owner and any billable owner returned by GitHub.
 3. Coral starts or resumes the Codespace, installs its private bridge, and installs Hermes from the official repository. GitHub automatically clones the selected repository. Use Coral's `.devcontainer/devcontainer.json` together with the `codespace/` scripts in that repository, or ensure its existing devcontainer installs an SSH server. The included configuration forwards no public bridge ports. The bridge defaults to `/workspaces/REPOSITORY_NAME`; a custom devcontainer workspace should set `CORAL_WORKSPACE` to its designated repository folder.
-4. On Mac, use **Terminal & SSH → Set up Hermes model**. To run the same setup from an SSH shell, use:
+4. Open **Hermes → Model** to choose a provider from the Codespace's Hermes catalog or add an OpenAI-compatible endpoint. For browser sign-in and advanced provider setup, open the Hermes wizard from the Mac app or run:
 
    ```bash
    gh codespace ssh --codespace YOUR_CODESPACE
-   ~/.local/bin/hermes setup model
+   ~/.local/bin/hermes model
    ~/.local/bin/hermes chat --help
    ```
 

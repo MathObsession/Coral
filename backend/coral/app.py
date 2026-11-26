@@ -14,7 +14,7 @@ from cryptography.fernet import InvalidToken
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse, StreamingResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, SecretStr
 from .admin import install_admin
 from .config import Config
 from .db import Database
@@ -60,6 +60,14 @@ class FileWrite(BaseModel):
 
 class HermesToggle(BaseModel):
     enabled: bool
+
+
+class HermesProvider(BaseModel):
+    provider: str = Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$")
+    model: str = Field(min_length=1, max_length=256)
+    name: str = Field(default="", max_length=40)
+    base_url: str = Field(default="", max_length=1024)
+    api_key: SecretStr = SecretStr("")
 
 
 class Schedule(BaseModel):
@@ -316,6 +324,23 @@ def create_app(config=None, driver=None, database=None, worker=True):
         if not body.enabled:
             for task in db.rows("SELECT * FROM tasks WHERE profile_id=? AND kind='hermes' AND status IN ('queued','running')", (profile_id,)):
                 await service.cancel(user_id, profile_id, task["id"])
+        service.activity(user_id, profile_id)
+        return result
+
+    @app.get("/profiles/{profile_id}/hermes/providers")
+    async def hermes_providers(profile_id: str, user_id=Depends(user)):
+        if config.demo:
+            raise HTTPException(409, "Configure model providers inside a Codespace.")
+        return await remote(user_id, profile_id, {"operation": "provider_options"})
+
+    @app.put("/profiles/{profile_id}/hermes/provider")
+    async def set_hermes_provider(profile_id: str, body: HermesProvider, user_id=Depends(user)):
+        if config.demo:
+            raise HTTPException(409, "Configure model providers inside a Codespace.")
+        result = await remote(user_id, profile_id, {
+            "operation": "set_provider", "provider": body.provider, "model": body.model,
+            "name": body.name, "base_url": body.base_url, "api_key": body.api_key.get_secret_value(),
+        })
         service.activity(user_id, profile_id)
         return result
 

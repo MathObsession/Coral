@@ -91,6 +91,19 @@ struct TokenResponse: Decodable { let token: String }
 struct URLResponse: Decodable { let url: String }
 struct SSHResponse: Decodable { let codespace: String; let account: String; let command: String; let configCommand: String }
 
+struct HermesProviderOption: Decodable, Identifiable {
+    let id: String
+    let name: String
+    let keyEnv: String
+    let interactive: Bool
+}
+
+struct HermesProvidersResponse: Decodable {
+    let providers: [HermesProviderOption]
+    let selected: String
+    let model: String
+}
+
 enum TimeFormat {
     static func duration(_ seconds: Double) -> String {
         let n = max(0, Int(seconds))

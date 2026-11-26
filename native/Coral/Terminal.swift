@@ -16,7 +16,7 @@ final class SSHConsole: ObservableObject {
         guard !profile.codespace.isEmpty, profile.codespace.unicodeScalars.allSatisfy({ allowed.contains($0) }),
               profile.login.unicodeScalars.allSatisfy({ allowed.contains($0) }) else { throw APIError.message("Invalid Codespace or GitHub account name.") }
         let ssh = "gh auth switch --hostname github.com --user \(quote(profile.login)) && gh codespace ssh --codespace \(quote(profile.codespace)) -- -tt"
-        return setupHermes ? ssh + " " + quote("$HOME/.local/bin/hermes setup model") : ssh
+        return setupHermes ? ssh + " " + quote("$HOME/.local/bin/hermes model") : ssh
     }
     func connect(_ profile: Profile) throws {
         disconnect()
