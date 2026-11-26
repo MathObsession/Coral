@@ -5,6 +5,7 @@ import uuid
 from collections import defaultdict
 from datetime import datetime, timezone, timedelta
 from fastapi import HTTPException
+from .github import GitHubError
 
 log = logging.getLogger("coral")
 
@@ -117,10 +118,9 @@ class Service:
         return self.public_profile(self.profile(user_id, profile_id))
 
     async def activate(self, profile, session):
+        phase = "wait for GitHub to start the Codespace"
         try:
-            state = await self.github.inspect(profile)
-            if state.get("state") == "Shutdown":
-                await self.github.start(profile)
+            start_requested = False
             for _ in range(120):
                 current = self.db.one("SELECT * FROM sessions WHERE id=?", (session["id"],))
                 if current["ended"] or self.profile(profile["user_id"], profile["id"])["state"] != "starting":
@@ -128,15 +128,27 @@ class Service:
                 if self.clock() >= current["deadline"]:
                     await self.stop(profile["user_id"], profile["id"], "startup_deadline")
                     return
-                state = await self.github.inspect(profile)
-                if state.get("state") == "Available":
-                    break
-                if state.get("state") in ("Failed", "Archived", "Deleted"):
-                    raise RuntimeError(f"GitHub reported that the Codespace is {state['state'].lower()}. Open Codespaces on GitHub to inspect it.")
+                try:
+                    state = await self.github.inspect(profile)
+                    current_state = state.get("state")
+                    if current_state == "Available":
+                        break
+                    if current_state in ("Failed", "Archived", "Deleted"):
+                        raise RuntimeError(f"GitHub reported that the Codespace is {current_state.lower()}.")
+                    if current_state == "Shutdown" and not start_requested:
+                        await self.github.start(profile)
+                        start_requested = True
+                        continue
+                except GitHubError as error:
+                    if error.status not in (None, 409, 422, 429, 500, 502, 503, 504):
+                        raise
                 await asyncio.sleep(2)
             else:
                 raise RuntimeError("GitHub is still preparing the Codespace after four minutes. Try resuming it again.")
-            await self.github.idle_timeout(profile, 10)
+            phase = "set the GitHub idle timeout"
+            if state.get("idle_timeout_minutes") != 10:
+                await self.github.idle_timeout(profile, 10)
+            phase = "prepare Hermes in the Codespace"
             await self.github.provision(profile)
             current = self.db.one("SELECT * FROM sessions WHERE id=?", (session["id"],))
             if current["ended"] or self.clock() >= current["deadline"]:
@@ -147,7 +159,9 @@ class Service:
         except asyncio.CancelledError:
             raise
         except Exception as error:
-            self.db.execute("UPDATE profiles SET error=? WHERE id=?", (str(error), profile["id"]))
+            detail = f"Could not {phase}. {error}"
+            log.warning("Codespace startup failed for profile %s: %s", profile["id"], detail)
+            self.db.execute("UPDATE profiles SET error=? WHERE id=?", (detail, profile["id"]))
             await self.stop(profile["user_id"], profile["id"], "startup_failed")
 
     async def start(self, user_id, profile_id):
@@ -172,12 +186,15 @@ class Service:
             self.finish(task, "cancelled", error=reason)
         try:
             if profile["codespace"]:
-                await self.github.stop(profile)
                 state = await self.github.inspect(profile)
                 if state.get("state") not in ("Shutdown", "Deleted", "Archived", "Failed"):
-                    return # Leave authoritative session active and retry until shutdown is confirmed.
+                    await self.github.stop(profile)
+                    state = await self.github.inspect(profile)
+                    if state.get("state") not in ("Shutdown", "Deleted", "Archived", "Failed"):
+                        return # Keep the session active until GitHub confirms shutdown.
         except Exception as error:
-            self.db.execute("UPDATE profiles SET error=? WHERE id=?", (str(error), profile_id))
+            if not profile["error"]:
+                self.db.execute("UPDATE profiles SET error=? WHERE id=?", (str(error), profile_id))
             return
         self.charge()
         self.db.execute("UPDATE sessions SET ended=?,reason=?,extended_until=NULL WHERE profile_id=? AND ended IS NULL", (self.clock(), reason, profile_id))

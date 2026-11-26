@@ -39,7 +39,8 @@ class GitHub:
                 raise GitHubError("GitHub denied the operation. Reconnect GitHub and check Codespaces access and billing for this repository.", status)
             if status == 404:
                 raise GitHubError("GitHub could not find this repository or Codespace for the connected account.", status)
-            raise GitHubError("GitHub could not complete the Codespace operation. Check its state and your account's Codespaces allowance.", status)
+            error = f" (HTTP {status})" if status else ""
+            raise GitHubError(f"GitHub could not complete the Codespace operation{error}. Check its state and your account's Codespaces allowance.", status)
         return out.decode()
 
     async def api(self, profile, endpoint, method="GET", body=None):
