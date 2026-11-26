@@ -6,7 +6,10 @@ struct CoralApp: App {
     var body: some Scene {
         mainWindow
         #if os(macOS)
-        Settings { SettingsView().environmentObject(store).frame(width: 520, height: 520) }
+        Settings {
+            SettingsView().environmentObject(store).frame(width: 520, height: 520)
+                .preferredColorScheme(.light)
+        }
         #endif
     }
     var mainWindow: some Scene {
@@ -14,6 +17,7 @@ struct CoralApp: App {
             RootView().environmentObject(store)
                 .font(.system(.body, design: .rounded).weight(.medium))
                 .foregroundStyle(CoralTheme.ink).tint(CoralTheme.orange)
+                .preferredColorScheme(.light)
                 #if os(macOS)
                 .frame(minWidth: 1000, minHeight: 700)
                 #endif

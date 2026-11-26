@@ -37,6 +37,7 @@ struct WorkspaceView: View {
             }.padding(20).background(.white).overlay(alignment: .top) { Rectangle().fill(CoralTheme.border).frame(height: 2) }
         }.background(CoralTheme.canvas).sheet(isPresented: $showModel) {
             NavigationStack { ModelProvidersView() }
+                .preferredColorScheme(.light)
                 #if os(macOS)
                 .frame(minWidth: 570, minHeight: 440)
                 #endif
