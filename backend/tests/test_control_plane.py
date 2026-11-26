@@ -169,6 +169,8 @@ def test_stop_failure_keeps_usage_running_and_retries(rig):
     asyncio.run(case())
     assert driver.stops == 2
     assert service.remaining("u") == 13770
+    assert db.one("SELECT reason FROM sessions")["reason"] == "inactivity"
+    assert service.profile("u", "p")["error"] == ""
 
 
 def add_schedule(db, clock, recurrence="once"):

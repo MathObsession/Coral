@@ -8,6 +8,8 @@ from fastapi import HTTPException
 from .github import GitHubError
 
 log = logging.getLogger("coral")
+SHUTDOWN_PENDING = "Waiting for GitHub to confirm shutdown. Coral will retry."
+STOPPED_CODESPACE_STATES = {"Shutdown", "Deleted", "Archived", "Failed"}
 
 
 def identifier():
@@ -177,6 +179,7 @@ class Service:
     async def stop(self, user_id, profile_id, reason="user_stopped"):
         profile = self.profile(user_id, profile_id)
         self.db.execute("UPDATE profiles SET state='stopping' WHERE id=?", (profile_id,))
+        self.db.execute("UPDATE sessions SET reason=? WHERE profile_id=? AND ended IS NULL AND reason=''", (reason, profile_id))
         for task in self.db.rows("SELECT * FROM tasks WHERE profile_id=? AND status IN ('queued','running')", (profile_id,)):
             try:
                 if profile["codespace"]:
@@ -186,19 +189,23 @@ class Service:
             self.finish(task, "cancelled", error=reason)
         try:
             if profile["codespace"]:
-                state = await self.github.inspect(profile)
-                if state.get("state") not in ("Shutdown", "Deleted", "Archived", "Failed"):
+                state = (await self.github.inspect(profile)).get("state")
+                if state == "ShuttingDown":
+                    return
+                if state not in STOPPED_CODESPACE_STATES:
                     await self.github.stop(profile)
-                    state = await self.github.inspect(profile)
-                    if state.get("state") not in ("Shutdown", "Deleted", "Archived", "Failed"):
+                    state = (await self.github.inspect(profile)).get("state")
+                    if state not in STOPPED_CODESPACE_STATES:
                         return # Keep the session active until GitHub confirms shutdown.
         except Exception as error:
             if not profile["error"]:
-                self.db.execute("UPDATE profiles SET error=? WHERE id=?", (str(error), profile_id))
+                log.warning("Codespace shutdown pending for profile %s: %s", profile_id, error)
+                self.db.execute("UPDATE profiles SET error=? WHERE id=?", (SHUTDOWN_PENDING, profile_id))
             return
         self.charge()
-        self.db.execute("UPDATE sessions SET ended=?,reason=?,extended_until=NULL WHERE profile_id=? AND ended IS NULL", (self.clock(), reason, profile_id))
-        self.db.execute("UPDATE profiles SET state=?,hermes=0 WHERE id=?", ("stopped" if profile["codespace"] else "unconfigured", profile_id))
+        self.db.execute("UPDATE sessions SET ended=?,extended_until=NULL WHERE profile_id=? AND ended IS NULL", (self.clock(), profile_id))
+        self.db.execute("UPDATE profiles SET state=?,hermes=0,error=CASE WHEN error=? THEN '' ELSE error END WHERE id=?",
+                        ("stopped" if profile["codespace"] else "unconfigured", SHUTDOWN_PENDING, profile_id))
 
     def activity(self, user_id, profile_id):
         self.profile(user_id, profile_id)
