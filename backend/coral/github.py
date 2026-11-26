@@ -66,6 +66,16 @@ class GitHub:
             if prior:
                 result = prior[0]
             else:
+                if repo.get("size") == 0:
+                    # Tiny repositories can also report size zero. Check for a commit before rejecting.
+                    try:
+                        commits = await self.api(profile, f"repos/{repository}/commits?per_page=1")
+                    except GitHubError as error:
+                        if error.status != 409:
+                            raise
+                        commits = []
+                    if not commits:
+                        raise GitHubError("This GitHub repository has no commits. Add a README or another file on GitHub, then connect it again.", 409)
                 try:
                     result = await self.api(profile, "user/codespaces", "POST", {
                         "repository_id": repo["id"], "ref": repo["default_branch"],

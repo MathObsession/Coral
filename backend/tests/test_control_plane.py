@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 from coral.app import create_app
 from coral.config import Config
 from coral.db import Database
-from coral.github import LocalGitHub
+from coral.github import GitHub, GitHubError, LocalGitHub
 from coral.security import Security, challenge
 from coral.service import Service, identifier
 
@@ -54,6 +54,36 @@ def rig(tmp_path):
 async def started(service):
     await service.start("u", "p")
     await asyncio.gather(*service.pending)
+
+
+@pytest.mark.parametrize("empty", [True, False])
+def test_codespace_requires_a_commit_in_a_zero_size_repository(monkeypatch, empty):
+    github = GitHub(None)
+    profile = {"id": "profile", "github_id": 42}
+    repository = "dev/repo"
+    creates = []
+
+    async def api(_profile, endpoint, method="GET", body=None):
+        if endpoint == "repos/dev/repo":
+            return {"id": 123, "size": 0, "default_branch": "main"}
+        if endpoint == "user/codespaces?per_page=100":
+            return {"codespaces": []}
+        if endpoint == "repos/dev/repo/commits?per_page=1":
+            if empty:
+                raise GitHubError("GitHub request failed", 409)
+            return [{"sha": "initial-commit"}]
+        assert (endpoint, method) == ("user/codespaces", "POST")
+        creates.append(body)
+        return {"name": "my-codespace", "owner": {"id": 42}, "repository": {"full_name": repository}}
+
+    monkeypatch.setattr(github, "api", api)
+    if empty:
+        with pytest.raises(GitHubError, match="repository has no commits"):
+            asyncio.run(github.bind(profile, repository))
+        assert not creates
+    else:
+        assert asyncio.run(github.bind(profile, repository)) == "my-codespace"
+        assert [request["ref"] for request in creates] == ["main"]
 
 
 def test_duplicate_starts_reserve_one_session(rig):
