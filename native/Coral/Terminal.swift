@@ -11,11 +11,12 @@ final class SSHConsole: ObservableObject {
     private var pipe: Pipe?
 
     static func quote(_ value: String) -> String { "'" + value.replacingOccurrences(of: "'", with: "'\\''") + "'" }
-    static func command(_ profile: Profile) throws -> String {
+    static func command(_ profile: Profile, setupHermes: Bool = false) throws -> String {
         let allowed = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-"))
         guard !profile.codespace.isEmpty, profile.codespace.unicodeScalars.allSatisfy({ allowed.contains($0) }),
               profile.login.unicodeScalars.allSatisfy({ allowed.contains($0) }) else { throw APIError.message("Invalid Codespace or GitHub account name.") }
-        return "gh auth switch --hostname github.com --user \(quote(profile.login)) && gh codespace ssh --codespace \(quote(profile.codespace)) -- -tt"
+        let ssh = "gh auth switch --hostname github.com --user \(quote(profile.login)) && gh codespace ssh --codespace \(quote(profile.codespace)) -- -tt"
+        return setupHermes ? ssh + " " + quote("$HOME/.local/bin/hermes setup model") : ssh
     }
     func connect(_ profile: Profile) throws {
         disconnect()
@@ -46,9 +47,9 @@ final class SSHConsole: ObservableObject {
         pipe?.fileHandleForReading.readabilityHandler = nil
         process = nil; input = nil; pipe = nil; running = false
     }
-    func openTerminal(_ profile: Profile, app: String) async throws {
-        let command = try Self.command(profile)
-        let file = FileManager.default.temporaryDirectory.appendingPathComponent("Coral-\(profile.codespace).command")
+    func openTerminal(_ profile: Profile, app: String, setupHermes: Bool = false) async throws {
+        let command = try Self.command(profile, setupHermes: setupHermes)
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent("Coral-\(UUID().uuidString).command")
         try ("#!/bin/zsh\nexport PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin\n" + command + "\n").write(to: file, atomically: true, encoding: .utf8)
         try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: file.path)
         let bundleId = app == "iTerm" ? "com.googlecode.iterm2" : "com.apple.Terminal"
@@ -67,6 +68,13 @@ struct TerminalView: View {
     @StateObject private var ssh = SSHConsole()
     @State private var mode = "Commands"
     #endif
+    private var canExecute: Bool {
+        guard !command.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, store.profile?.ready == true else { return false }
+        #if os(macOS)
+        if mode == "SSH" { return ssh.running }
+        #endif
+        return !store.busy && !store.tasks.contains(where: \.active)
+    }
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             HStack {
@@ -89,6 +97,10 @@ struct TerminalView: View {
                             store.interaction("terminal")
                         }.buttonStyle(TactileButtonStyle(color: CoralTheme.green)).disabled(store.profile?.ready != true)
                     }
+                    Button("Set up Hermes model") {
+                        guard let profile = store.profile else { return }
+                        store.perform { try await ssh.openTerminal(profile, app: store.terminalApp, setupHermes: true) }
+                    }.disabled(store.busy || store.profile?.ready != true)
                     #else
                     Text("Use this official GitHub command on a computer with gh installed. On iPhone, execute commands below through your authenticated Coral connection.").font(.caption).foregroundStyle(CoralTheme.muted)
                     #endif
@@ -112,7 +124,7 @@ struct TerminalView: View {
             HStack {
                 Text("$").font(.system(.headline, design: .monospaced)).foregroundStyle(CoralTheme.green)
                 TextField("Enter a workspace command", text: $command).textFieldStyle(.roundedBorder).onSubmit { execute() }.onChange(of: command) { _, _ in store.interaction("terminal") }
-                Button("Run") { execute() }.buttonStyle(TactileButtonStyle(color: CoralTheme.green)).disabled(command.isEmpty || store.busy || store.profile?.ready != true)
+                Button("Run") { execute() }.buttonStyle(TactileButtonStyle(color: CoralTheme.green)).disabled(!canExecute)
                 #if os(macOS)
                 if mode == "SSH" { Button("Ctrl+C") { ssh.send("\u{0003}"); store.interaction("terminal") } }
                 #endif
@@ -125,7 +137,11 @@ struct TerminalView: View {
                 ssh.disconnect(); mode = "Commands"
                 #endif
             }
-            .task(id: store.selectedId) { do { sshInfo = try await store.api.request(store.root + "/ssh") } catch { sshInfo = nil } }
+            .task(id: store.profile?.codespace) {
+                sshInfo = nil
+                guard store.profile?.codespace.isEmpty == false else { return }
+                do { sshInfo = try await store.api.request(store.root + "/ssh") } catch { sshInfo = nil }
+            }
             .onDisappear {
                 #if os(macOS)
                 ssh.disconnect()
@@ -146,9 +162,11 @@ struct TerminalView: View {
         }
     }
     func execute() {
+        guard canExecute else { return }
         #if os(macOS)
         if mode == "SSH" { ssh.send(command + "\n"); store.interaction("terminal"); command = ""; return }
         #endif
-        store.run(command, kind: "terminal"); command = ""
+        let submitted = command
+        store.run(submitted, kind: "terminal") { if command == submitted { command = "" } }
     }
 }

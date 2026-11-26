@@ -5,7 +5,6 @@
     "ghcr.io/devcontainers/features/sshd:1": { "version": "latest" },
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
-  "postCreateCommand": "bash codespace/install.sh && mkdir -p ~/.local/share/coral && cp codespace/runtime.py ~/.local/share/coral/runtime.py",
   "remoteEnv": { "CORAL_WORKSPACE": "${containerWorkspaceFolder}" },
   "customizations": { "vscode": { "settings": { "files.exclude": { "**/.env": true } } } },
   "forwardPorts": []

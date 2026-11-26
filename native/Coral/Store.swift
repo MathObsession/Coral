@@ -114,9 +114,12 @@ final class CoralStore: ObservableObject {
         lastActivity = Date()
         Task { _ = try? await api.raw(root + "/activity", method: "POST", body: ["kind": kind]) }
     }
-    func run(_ prompt: String, kind: String = "hermes") {
+    func run(_ prompt: String, kind: String = "hermes", onAccepted: @escaping () -> Void = {}) {
         let id = UUID().uuidString
-        perform { _ = try await self.api.raw(self.root + "/tasks", method: "POST", body: ["prompt": prompt, "kind": kind, "duration_limit": 900], key: id) }
+        perform {
+            _ = try await self.api.raw(self.root + "/tasks", method: "POST", body: ["prompt": prompt, "kind": kind, "duration_limit": 900], key: id)
+            onAccepted()
+        }
     }
     func cancel(_ task: AgentTask) { command("tasks/" + task.id + "/cancel") }
     func enableNotifications() {

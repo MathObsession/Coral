@@ -49,22 +49,41 @@ struct HomeView: View {
 
 struct SessionControls: View {
     @EnvironmentObject var store: CoralStore
+    @State private var showProfiles = false
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack { Label("Your Codespace", systemImage: "shippingbox.fill").font(.headline); Spacer(); StatusBadge(state: store.profile?.state ?? "unconfigured") }
-            Text(store.profile?.repository.isEmpty == false ? store.profile!.repository : "Connect a repository in Profiles to get started.").font(.subheadline).foregroundStyle(CoralTheme.muted)
             if let error = store.profile?.error, !error.isEmpty { Text(error).font(.caption).foregroundStyle(CoralTheme.red) }
-            HStack(spacing: 14) {
-                Button { store.command("start") } label: { Label(store.profile?.state == "stopped" ? "Resume workspace" : "Start workspace", systemImage: "play.fill") }
-                    .buttonStyle(TactileButtonStyle(color: CoralTheme.green)).disabled(store.busy || store.profile?.busy == true || store.profile?.ready == true || store.profile?.codespace.isEmpty != false)
-                Button { store.command("stop") } label: { Label("Stop", systemImage: "stop.fill") }.buttonStyle(TactileButtonStyle(color: .white))
-                    .disabled(store.busy || !["available", "starting", "stopping"].contains(store.profile?.state ?? ""))
-                if store.busy || store.profile?.busy == true { ProgressView().controlSize(.small) }
+            if let profile = store.profile, !profile.codespace.isEmpty {
+                Text(profile.repository).font(.subheadline).foregroundStyle(CoralTheme.muted)
+                HStack(spacing: 14) {
+                    Button { store.command("start") } label: { Label("Resume workspace", systemImage: "play.fill") }
+                        .buttonStyle(TactileButtonStyle(color: CoralTheme.green)).disabled(store.busy || profile.busy || profile.ready)
+                    Button { store.command("stop") } label: { Label("Stop", systemImage: "stop.fill") }
+                        .buttonStyle(TactileButtonStyle(color: .white)).disabled(store.busy || !(profile.ready || profile.busy))
+                }
+            } else if store.profile?.busy != true {
+                Text("Choose a GitHub repository to connect your first workspace.").font(.subheadline).foregroundStyle(CoralTheme.muted)
+                Button { showProfiles = true } label: { Label("Connect a Codespace", systemImage: "plus.circle.fill") }
+                    .buttonStyle(TactileButtonStyle(color: CoralTheme.green)).disabled(store.profile == nil)
+            }
+            if store.profile?.busy == true {
+                ProgressView(store.profile?.state == "stopping" ? "Stopping your Codespace…" : "Starting your Codespace and preparing Hermes…")
+                    .font(.subheadline)
             }
             if let usage = store.usage {
                 HStack { Label("Session \(TimeFormat.duration(usage.sessionSeconds))", systemImage: "clock"); Spacer(); Text("4-hour daily limit").foregroundStyle(CoralTheme.muted) }.font(.caption.bold())
             }
         }.coralCard()
+            .sheet(isPresented: $showProfiles) {
+                NavigationStack {
+                    ProfilesView().navigationTitle("Connect a Codespace")
+                        .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showProfiles = false } } }
+                }
+                #if os(macOS)
+                .frame(minWidth: 580, minHeight: 490)
+                #endif
+            }
     }
 }
 

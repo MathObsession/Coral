@@ -125,20 +125,18 @@ The `$()` keeps Xcode from interpreting `//` as a comment. Coral stores its own 
 ## Connect Hermes and your Codespace
 
 1. Sign into Coral with the GitHub account that should pay for your Codespace.
-2. Open Profiles and enter `owner/repository`. Leave the Codespace name empty to create one, or enter an existing owned Codespace name. Coral rejects a different repository or a known billable owner that does not match the profile account.
+2. Select **Connect a Codespace** on Home or open Profiles and enter `owner/repository`. Leave the Codespace name empty to create one, or enter an existing owned Codespace name. Coral verifies the repository and checks the owner and any billable owner returned by GitHub.
 3. Coral starts or resumes the Codespace, installs its private bridge, and installs Hermes from the official repository. GitHub automatically clones the selected repository. Use Coral's `.devcontainer/devcontainer.json` together with the `codespace/` scripts in that repository, or ensure its existing devcontainer installs an SSH server. The included configuration forwards no public bridge ports. The bridge defaults to `/workspaces/REPOSITORY_NAME`; a custom devcontainer workspace should set `CORAL_WORKSPACE` to its designated repository folder.
-4. Configure Hermes's model provider in the Codespace using the official setup flow:
+4. On Mac, use **Terminal & SSH → Set up Hermes model**. To run the same setup from an SSH shell, use:
 
    ```bash
    gh codespace ssh --codespace YOUR_CODESPACE
-   ~/.local/bin/hermes setup
+   ~/.local/bin/hermes setup model
    ~/.local/bin/hermes chat --help
    ```
 
    Provider credentials belong in Hermes's own configuration or GitHub Codespaces secrets, never Coral client source. Model-provider inference charges are separate from Codespaces compute and Coral's four-hour allowance.
-5. Send an initial task. Coral uses Hermes's noninteractive `hermes chat -q` entry point; check the upstream CLI help before live use. Installation fails explicitly if that entry point has changed. See [Hermes integration notes](docs/HERMES.md).
-
-The installer defaults to `origin/main`; set `HERMES_REF` to a reviewed tag/commit in your Codespace for reproducibility. It records the installed commit and CLI help in `~/.local/share/coral/hermes-agent/`. The backend provisions the bridge over official `gh codespace ssh`; a repository other than Coral does not need to include the backend or native project.
+5. Send an initial task. Coral uses `hermes chat --oneshot --query` and streams the captured process output through the backend. The installer verifies both CLI flags and records the pinned release under `~/.local/share/coral/`. [Hermes integration](docs/HERMES.md)
 
 Hermes Start/Stop controls enable or disable accepting new agent tasks. Stopping Hermes cancels its current task; it does not delete workspace files or turn off the Codespace. Stop workspace shuts down the Codespace. Tasks are discrete CLI invocations, and each task's prompt/output is retained in Coral's history; separate CLI invocations do not automatically share an upstream Hermes conversation thread. Include the relevant context in subsequent prompts.
 

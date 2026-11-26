@@ -34,7 +34,10 @@ struct WorkspaceView: View {
             }.padding(20).background(.white).overlay(alignment: .top) { Rectangle().fill(CoralTheme.border).frame(height: 2) }
         }.background(CoralTheme.canvas)
     }
-    func send() { store.run(prompt); prompt = "" }
+    func send() {
+        let submitted = prompt
+        store.run(submitted) { if prompt == submitted { prompt = "" } }
+    }
 }
 
 struct TaskCard: View {

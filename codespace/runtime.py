@@ -49,9 +49,13 @@ def cancel(task_id):
 def worker(request):
     directory = task_path(request["id"])
     deadline = request["deadline"]
-    command = ["bash", "-c", request["prompt"]] if request["kind"] == "terminal" else [str(Path.home() / ".local/bin/hermes"), "chat", "-q", request["prompt"]]
+    command = ["bash", "-c", request["prompt"]] if request["kind"] == "terminal" else [str(Path.home() / ".local/bin/hermes"), "chat", "--oneshot", "--query", request["prompt"]]
     with (directory / "output").open("wb", buffering=0) as output:
-        process = subprocess.Popen(command, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, start_new_session=True)
+        try:
+            process = subprocess.Popen(command, cwd=ROOT, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, start_new_session=True)
+        except OSError:
+            (directory / "result").write_text(json.dumps({"status": "failed", "error": "Could not launch the command. Check the workspace path and Hermes installation."}))
+            return
         selector = selectors.DefaultSelector()
         selector.register(process.stdout, selectors.EVENT_READ)
         total = 0
@@ -91,7 +95,8 @@ def dispatch(request):
     operation = request["operation"]
     if operation == "health":
         hermes = Path.home() / ".local/bin/hermes"
-        return {"installed": hermes.exists(), "workspace": str(ROOT), "enabled": not (STATE / "disabled").exists()}
+        return {"installed": hermes.is_file() and os.access(hermes, os.X_OK), "workspace": str(ROOT),
+                "workspace_ready": ROOT.is_dir(), "enabled": not (STATE / "disabled").exists()}
     if operation == "hermes":
         if request["enabled"]:
             (STATE / "disabled").unlink(missing_ok=True)

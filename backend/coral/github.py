@@ -8,7 +8,9 @@ from pathlib import Path
 
 
 class GitHubError(RuntimeError):
-    pass
+    def __init__(self, message, status=None):
+        super().__init__(message)
+        self.status = status
 
 
 class GitHub:
@@ -16,20 +18,28 @@ class GitHub:
         self.security = security
 
     async def gh(self, profile, *args, stdin=None, timeout=90):
-        env = os.environ.copy()
+        env = {key: os.environ[key] for key in ("HOME", "PATH", "LANG", "TERM") if key in os.environ}
         env["GH_TOKEN"] = self.security.open(profile["token"])
         env["GH_PROMPT_DISABLED"] = "1"
         process = await asyncio.create_subprocess_exec("gh", *args, env=env, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
         try:
             out, err = await asyncio.wait_for(process.communicate(stdin), timeout)
-        except BaseException:
+        except (asyncio.CancelledError, TimeoutError) as error:
             if process.returncode is None:
                 process.kill()
                 await process.wait()
-            raise
+            if isinstance(error, asyncio.CancelledError):
+                raise
+            raise GitHubError("GitHub did not respond in time. Try the operation again.") from None
         if process.returncode:
             # GitHub may echo a token in errors; never retain raw stderr.
-            raise GitHubError(f"GitHub operation failed (exit {process.returncode}). Check OAuth permissions, account billing, and Codespace availability.")
+            match = re.search(rb"\bHTTP (\d{3})\b", err)
+            status = int(match[1]) if match else None
+            if status in (401, 403):
+                raise GitHubError("GitHub denied the operation. Reconnect GitHub and check Codespaces access and billing for this repository.", status)
+            if status == 404:
+                raise GitHubError("GitHub could not find this repository or Codespace for the connected account.", status)
+            raise GitHubError("GitHub could not complete the Codespace operation. Check its state and your account's Codespaces allowance.", status)
         return out.decode()
 
     async def api(self, profile, endpoint, method="GET", body=None):
@@ -56,7 +66,10 @@ class GitHub:
                 result = prior[0]
             else:
                 try:
-                    result = await self.api(profile, f'repositories/{repo["id"]}/codespaces', "POST", {"display_name": label, "idle_timeout_minutes": 10, "retention_period_minutes": 43200})
+                    result = await self.api(profile, "user/codespaces", "POST", {
+                        "repository_id": repo["id"], "ref": repo["default_branch"],
+                        "display_name": label, "idle_timeout_minutes": 10, "retention_period_minutes": 43200,
+                    })
                 except BaseException:
                     # Recover an ambiguous POST response before allowing another create.
                     try:
@@ -90,11 +103,21 @@ class GitHub:
         root = Path(__file__).resolve().parents[2]
         runtime = base64.b64encode((root / "codespace/runtime.py").read_bytes()).decode()
         installer = base64.b64encode((root / "codespace/install.sh").read_bytes()).decode()
-        command = f"mkdir -p ~/.local/share/coral; echo {shlex.quote(runtime)} | base64 -d > ~/.local/share/coral/runtime.py; echo {shlex.quote(installer)} | base64 -d > ~/.local/share/coral/install.sh; test -x ~/.local/bin/hermes || bash ~/.local/share/coral/install.sh"
-        await self.gh(profile, "codespace", "ssh", "--codespace", profile["codespace"], "--", command, timeout=360)
+        command = (
+            "umask 077; mkdir -p ~/.local/share/coral && "
+            f"printf '%s' {shlex.quote(runtime)} | base64 -d > ~/.local/share/coral/runtime.py && "
+            f"printf '%s' {shlex.quote(installer)} | base64 -d > ~/.local/share/coral/install.sh && "
+            "bash ~/.local/share/coral/install.sh > ~/.local/share/coral/hermes-install.log 2>&1"
+        )
+        try:
+            await self.gh(profile, "codespace", "ssh", "--codespace", profile["codespace"], "--", "-T", command, timeout=420)
+        except GitHubError as error:
+            raise GitHubError("Coral could not prepare Hermes over SSH. Check ~/.local/share/coral/hermes-install.log in the Codespace.", error.status) from None
         result = await self.remote(profile, {"operation": "health"})
         if not result.get("installed"):
             raise GitHubError("Hermes installation was not successful. Inspect the Codespace through SSH.")
+        if not result.get("workspace_ready"):
+            raise GitHubError("The repository folder is missing in the Codespace. Check its CORAL_WORKSPACE setting.")
 
     async def remote(self, profile, request):
         # Fixed command; user input is JSON on stdin and never interpolated into SSH arguments.
@@ -103,7 +126,7 @@ class GitHub:
             raise GitHubError("A valid designated repository is required for workspace access.")
         folder = "/workspaces/" + repository.split("/")[-1]
         command = 'CORAL_WORKSPACE="${CORAL_WORKSPACE:-' + folder + '}" python3 ~/.local/share/coral/runtime.py'
-        output = await self.gh(profile, "codespace", "ssh", "--codespace", profile["codespace"], "--", command, stdin=json.dumps(request).encode(), timeout=30)
+        output = await self.gh(profile, "codespace", "ssh", "--codespace", profile["codespace"], "--", "-T", command, stdin=json.dumps(request).encode(), timeout=30)
         try:
             return json.loads(output)
         except ValueError:

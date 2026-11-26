@@ -2,7 +2,7 @@
 
 These checks require the user's configured GitHub OAuth app, backend, Codespaces billing, and Hermes model provider. They are separate from automated local checks.
 
-1. Inspect the official Hermes documentation and validate `hermes chat -q` against the installed CLI help. Pin the reviewed `HERMES_REF`.
+1. Check the Codespace installer log and confirm `hermes chat --help` lists `--oneshot` and `--query` for the release pinned in `codespace/install.sh`.
 2. Authenticate the Mac app with GitHub. Confirm the callback returns a one-use code, and profiles expose no GitHub token/private key.
 3. In Profiles, select the repository and create or bind the account's Codespace. Confirm the repository and billable account in GitHub. Observe starting → available.
 4. Configure the model provider through `gh codespace ssh --codespace NAME` and `hermes setup`. Submit a real Hermes task, inspect progress/final output, and cancel another task.

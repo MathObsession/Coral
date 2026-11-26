@@ -4,6 +4,7 @@ struct ProfilesView: View {
     @EnvironmentObject var store: CoralStore
     @State private var repository = ""
     @State private var codespace = ""
+    private var trimmedRepository: String { repository.trimmingCharacters(in: .whitespacesAndNewlines) }
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
@@ -14,12 +15,24 @@ struct ProfilesView: View {
                 }
                 VStack(alignment: .leading, spacing: 18) {
                     Text("Connect this profile’s workspace").font(.title3.bold())
-                    TextField("Repository: owner/name", text: $repository).textFieldStyle(.roundedBorder)
-                    TextField("Existing Codespace name (optional)", text: $codespace).textFieldStyle(.roundedBorder)
-                    Text("Leave the Codespace name empty to create one. Your repository is cloned by GitHub, then Coral installs the Hermes bridge. A startup session consumes your daily allowance.").font(.caption).foregroundStyle(CoralTheme.muted)
-                    Button("Connect & initialize Hermes") { store.command("connect", body: ["repository": repository, "codespace": codespace]) }.buttonStyle(TactileButtonStyle(color: CoralTheme.green)).disabled(repository.isEmpty || store.busy || store.profile?.codespace.isEmpty == false)
-                    if store.busy { ProgressView("Preparing your workspace…") }
-                    if store.profile?.codespace.isEmpty == false { Button("Stop and disconnect workspace") { store.command("disconnect") }.buttonStyle(TactileButtonStyle(color: .white)) }
+                    if let profile = store.profile, !profile.codespace.isEmpty {
+                        HStack { Text(profile.repository).font(.headline); Spacer(); StatusBadge(state: profile.state) }
+                        Text(profile.codespace).font(.system(.caption, design: .monospaced)).textSelection(.enabled)
+                        Button("Stop and disconnect workspace") { store.command("disconnect") }
+                            .buttonStyle(TactileButtonStyle(color: .white)).disabled(store.busy || profile.busy)
+                    } else {
+                        TextField("Repository (owner/name)", text: $repository).textFieldStyle(.roundedBorder)
+                        TextField("Existing Codespace name (optional)", text: $codespace).textFieldStyle(.roundedBorder)
+                        Text("Leave the Codespace name empty to create one. GitHub clones the repository and Coral installs Hermes. Setup consumes part of your daily allowance.").font(.caption).foregroundStyle(CoralTheme.muted)
+                        Button("Connect & initialize Hermes") {
+                            store.command("connect", body: ["repository": trimmedRepository, "codespace": codespace.trimmingCharacters(in: .whitespacesAndNewlines)])
+                        }.buttonStyle(TactileButtonStyle(color: CoralTheme.green))
+                            .disabled(trimmedRepository.split(separator: "/").count != 2 || store.busy || store.profile == nil || store.profile?.busy == true)
+                    }
+                    if store.busy || store.profile?.state == "starting" { ProgressView("Preparing your workspace…") }
+                    if let error = store.profile?.error, !error.isEmpty {
+                        Label(error, systemImage: "exclamationmark.circle.fill").font(.caption).foregroundStyle(CoralTheme.red)
+                    }
                 }.coralCard()
                 Button("Add another GitHub account") { store.signIn(link: true) }.buttonStyle(TactileButtonStyle()).disabled(store.busy)
             }.padding(24).frame(maxWidth: 850).frame(maxWidth: .infinity)

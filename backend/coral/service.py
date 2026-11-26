@@ -103,7 +103,14 @@ class Service:
                 name = await self.github.bind(profile, repository, codespace)
                 self.db.execute("UPDATE profiles SET repository=?,codespace=? WHERE id=?", (repository, name, profile_id))
                 profile = self.profile(user_id, profile_id)
-                await self.activate(profile, session)
+                if self.config.demo:
+                    await self.activate(profile, session)
+                else:
+                    self.spawn(self.activate(profile, session))
+            except Exception as error:
+                self.db.execute("UPDATE profiles SET error=? WHERE id=?", (str(error), profile_id))
+                await self.stop(user_id, profile_id, "configuration_failed")
+                raise
             except BaseException:
                 await self.stop(user_id, profile_id, "configuration_failed")
                 raise
@@ -111,21 +118,25 @@ class Service:
 
     async def activate(self, profile, session):
         try:
-            await self.github.idle_timeout(profile, 10)
             state = await self.github.inspect(profile)
-            if state.get("state") != "Available":
+            if state.get("state") == "Shutdown":
                 await self.github.start(profile)
-            for _ in range(90):
+            for _ in range(120):
                 current = self.db.one("SELECT * FROM sessions WHERE id=?", (session["id"],))
-                if current["ended"] or self.clock() >= current["deadline"]:
-                    await self.github.stop(profile)
+                if current["ended"] or self.profile(profile["user_id"], profile["id"])["state"] != "starting":
+                    return
+                if self.clock() >= current["deadline"]:
+                    await self.stop(profile["user_id"], profile["id"], "startup_deadline")
                     return
                 state = await self.github.inspect(profile)
                 if state.get("state") == "Available":
                     break
+                if state.get("state") in ("Failed", "Archived", "Deleted"):
+                    raise RuntimeError(f"GitHub reported that the Codespace is {state['state'].lower()}. Open Codespaces on GitHub to inspect it.")
                 await asyncio.sleep(2)
             else:
-                raise RuntimeError("Codespace did not become available within three minutes.")
+                raise RuntimeError("GitHub is still preparing the Codespace after four minutes. Try resuming it again.")
+            await self.github.idle_timeout(profile, 10)
             await self.github.provision(profile)
             current = self.db.one("SELECT * FROM sessions WHERE id=?", (session["id"],))
             if current["ended"] or self.clock() >= current["deadline"]:

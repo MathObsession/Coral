@@ -66,6 +66,27 @@ def test_duplicate_starts_reserve_one_session(rig):
     assert len(db.rows("SELECT * FROM sessions WHERE ended IS NULL")) == 1
 
 
+def test_connect_waits_for_new_codespace_without_starting_it_again(rig, monkeypatch):
+    service, db, driver, _ = rig
+    service.config.demo = False
+    db.execute("UPDATE profiles SET codespace='',state='unconfigured' WHERE id='p'")
+    states = iter(("Provisioning", "Available"))
+
+    async def inspect(profile):
+        return {"state": next(states)}
+
+    monkeypatch.setattr(driver, "inspect", inspect)
+
+    async def case():
+        profile = await service.configure("u", "p", "dev/repo", "")
+        assert profile["state"] == "starting"
+        await asyncio.gather(*service.pending)
+
+    asyncio.run(case())
+    assert driver.starts == 0
+    assert service.profile("u", "p")["state"] == "available"
+
+
 def test_polling_never_resets_inactivity_and_exact_timeout(rig):
     service, db, driver, clock = rig
     async def case():

@@ -19,16 +19,20 @@ extension Color {
 }
 
 struct TactileButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
     var color = CoralTheme.orange
     func makeBody(configuration: Configuration) -> some View {
+        let shape = RoundedRectangle(cornerRadius: 16)
         configuration.label.font(.system(size: 14, weight: .bold, design: .rounded))
             .padding(.horizontal, 18).padding(.vertical, 12)
             .foregroundStyle(color == .white ? CoralTheme.ink : .white)
-            .background(color, in: RoundedRectangle(cornerRadius: 16))
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(color == .white ? CoralTheme.border : color.opacity(0.8), lineWidth: 2))
+            .background(color, in: shape)
+            .overlay { shape.strokeBorder(color == .white ? CoralTheme.border : color.opacity(0.8), lineWidth: 2).allowsHitTesting(false) }
             .compositingGroup()
             .shadow(color: color == .white ? CoralTheme.border : color.opacity(0.6), radius: 0, y: configuration.isPressed ? 0 : 4)
             .offset(y: configuration.isPressed ? 4 : 0)
+            .contentShape(shape)
+            .opacity(isEnabled ? 1 : 0.55)
     }
 }
 
@@ -37,7 +41,7 @@ struct CardModifier: ViewModifier {
     func body(content: Content) -> some View {
         content.padding(22).frame(maxWidth: .infinity, alignment: .leading)
             .background(tint, in: RoundedRectangle(cornerRadius: 24))
-            .overlay(RoundedRectangle(cornerRadius: 24).stroke(CoralTheme.border, lineWidth: 2))
+            .overlay { RoundedRectangle(cornerRadius: 24).strokeBorder(CoralTheme.border, lineWidth: 2).allowsHitTesting(false) }
             .compositingGroup()
             .shadow(color: CoralTheme.border, radius: 0, y: 4)
     }
