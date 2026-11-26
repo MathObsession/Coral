@@ -43,6 +43,8 @@ Local sign-in is only available with `CORAL_DEMO=1` and a loopback client. Never
 
 ## Deploy the backend
 
+For **Render Free**, use **New → Web Service** rather than Blueprint and follow [the free deployment instructions](docs/RENDER_FREE.md). That option uses external PostgreSQL and an authenticated external cron job so storage and scheduling do not depend on the free service's ephemeral disk or an open app. The paid persistent-disk alternative below remains available.
+
 1. Create your GitHub repository and push Coral. GitHub operations use `gh`:
 
    ```bash

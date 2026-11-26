@@ -11,7 +11,7 @@ from .service import Service
 async def check():
     config = Config()
     config.validate()
-    db = Database(config.database)
+    db = Database(config.database, config.database_url)
     heartbeat = db.one("SELECT value FROM metadata WHERE key='worker_heartbeat'")
     if heartbeat and time.time() - heartbeat["value"] < 90:
         return

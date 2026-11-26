@@ -39,15 +39,18 @@ class Service:
     def charge(self, now=None):
         now = self.clock() if now is None else now
         with self.db.transaction() as tx:
-            for session in tx.execute("SELECT * FROM sessions WHERE ended IS NULL").fetchall():
+            query = "SELECT * FROM sessions WHERE ended IS NULL"
+            if self.db.engine == "postgresql":
+                query += " FOR UPDATE" # Serialize accounting during overlapping deploys.
+            for session in tx.execute(query).fetchall():
                 cursor = session["accounted"]
                 while cursor < now:
                     day = day_of(cursor)
                     midnight = (datetime.fromtimestamp(cursor, timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)).timestamp()
                     end = min(now, midnight)
                     amount = end - cursor
-                    tx.execute("INSERT INTO usage VALUES(?,?,?) ON CONFLICT(user_id,day) DO UPDATE SET seconds=seconds+excluded.seconds", (session["user_id"], day, amount))
-                    tx.execute("INSERT INTO profile_usage VALUES(?,?,?) ON CONFLICT(profile_id,day) DO UPDATE SET seconds=seconds+excluded.seconds", (session["profile_id"], day, amount))
+                    tx.execute("INSERT INTO usage VALUES(?,?,?) ON CONFLICT(user_id,day) DO UPDATE SET seconds=usage.seconds+excluded.seconds", (session["user_id"], day, amount))
+                    tx.execute("INSERT INTO profile_usage VALUES(?,?,?) ON CONFLICT(profile_id,day) DO UPDATE SET seconds=profile_usage.seconds+excluded.seconds", (session["profile_id"], day, amount))
                     cursor = end
                 tx.execute("UPDATE sessions SET accounted=? WHERE id=?", (max(now, session["accounted"]), session["id"]))
 

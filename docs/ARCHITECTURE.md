@@ -5,7 +5,7 @@ flowchart LR
     Mac[SwiftUI Mac] -->|HTTPS · Coral bearer| Backend[Always-on backend]
     Phone[SwiftUI iPhone] -->|HTTPS · Coral bearer| Backend
     Pages[GitHub Pages dashboard] -->|HTTPS · Coral bearer| Backend
-    Backend --> DB[(SQLite WAL)]
+    Backend --> DB[(SQLite or PostgreSQL)]
     Backend -->|OAuth exchange · private secret| OAuth[GitHub OAuth]
     Backend -->|gh API · encrypted account token| GitHub[GitHub Codespaces API]
     Backend -->|gh codespace ssh · JSON stdin| Bridge[Private Codespace bridge]
@@ -15,6 +15,7 @@ flowchart LR
     Mac -->|Local gh login · separate SSH| Bridge
     Watchdog[Independent stop-only watchdog] --> DB
     Watchdog --> GitHub
+    Cron[External scheduler] -->|Authenticated POST| Backend
 ```
 
 ## Ownership and authentication
@@ -38,6 +39,8 @@ An always-on loop checks persistent `schedules`, external to the clients, GitHub
 Scheduled work only acquires an otherwise idle account. Insufficient allowance records a skipped task and notification. Results and execution failures are stored in `tasks` and `notifications`; clients can retrieve them after the Codespace stops. Completion causes shutdown on the next tick. Graceful exit stops sessions; restart recovery records uncertain in-flight tasks as failures and stops the environment without replay.
 
 `metadata.worker_heartbeat` supports the optional independent systemd watchdog, which stops active Codespaces when the main worker stops reporting. Its credentials remain on the backend host. GitHub's configured native idle timeout is an additional fallback, not a substitute for Coral's authoritative timer.
+
+For Render Free, accounts, tokens, schedules, and accounting live in an external PostgreSQL database. PostgreSQL uses float64 timestamps and row locks for session accounting. A private `POST /internal/tick` hook accepts only the configured scheduler token and wakes supervision without recording user activity. An external cron service calls it independently of the apps. Free mode refuses an ephemeral database fallback. See [RENDER_FREE.md](RENDER_FREE.md) for setup and cold-start limits.
 
 ## API outline
 

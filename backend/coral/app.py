@@ -73,7 +73,7 @@ class Schedule(BaseModel):
 def create_app(config=None, driver=None, database=None, worker=True):
     config = config or Config()
     config.validate()
-    db = database or Database(config.database)
+    db = database or Database(config.database, config.database_url)
     security = Security(db, config)
     github = driver or (LocalGitHub(Path(config.database).parent / "workspace") if config.demo else GitHub(security))
     service = Service(db, config, github)
@@ -148,7 +148,17 @@ def create_app(config=None, driver=None, database=None, worker=True):
 
     @app.get("/health")
     async def health():
-        return {"status": "ok", "name": "Coral", "mode": "local" if config.demo else "production"}
+        return {"status": "ok", "name": "Coral", "mode": "local" if config.demo else "production",
+                "storage": db.engine, "hosting": config.hosting_mode}
+
+    @app.post("/internal/tick")
+    async def external_tick(x_coral_scheduler_token: str = Header(default="")):
+        if not config.scheduler_token:
+            raise HTTPException(404, "Not found")
+        if not secrets.compare_digest(config.scheduler_token, x_coral_scheduler_token):
+            raise HTTPException(401, "Invalid scheduler credential.")
+        service.wake.set()
+        return {"accepted": True}
 
     @app.post("/auth/local")
     async def local_login(request: Request):

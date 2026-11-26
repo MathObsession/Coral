@@ -4,6 +4,8 @@ This document distinguishes implemented source, executed local checks, and live 
 
 Final result: **41 automated checks passed** — 31 backend/runtime, six web, and four native. Both native applications were launched through Xcode. Development bundles are in `build/deliverables/`; real iPhone screenshots and accessibility dumps are in `build/screenshots/`.
 
+Render Free adaptation: **37 backend/runtime tests and six web tests pass**. The six additional backend checks cover required persistent-storage configuration, PostgreSQL SQL/precision handling, TLS and bound values, safe reconnection, and authenticated external scheduling without resetting inactivity. One live PostgreSQL integration test is skipped until a dedicated `CORAL_TEST_DATABASE_URL` is supplied. Native source/API contracts did not change in this adaptation.
+
 ## Executed
 
 - Inspected every original asset: mascot PNG, all three screen PNGs, their HTML sources, and `assets/tactile_playful_craft/DESIGN.md`.
